@@ -44,10 +44,10 @@ import org.junit.Test;
 
 @Generated("by gapic-generator-java")
 public class PartitionAssignmentServiceClientTest {
-  private static MockServiceHelper mockServiceHelper;
   private static MockPartitionAssignmentService mockPartitionAssignmentService;
-  private PartitionAssignmentServiceClient client;
+  private static MockServiceHelper mockServiceHelper;
   private LocalChannelProvider channelProvider;
+  private PartitionAssignmentServiceClient client;
 
   @BeforeClass
   public static void startStaticServer() {

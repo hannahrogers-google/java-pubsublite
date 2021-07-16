@@ -16,25 +16,22 @@
 
 package com.google.cloud.pubsublite.internal.wire;
 
-import static com.google.cloud.pubsublite.internal.ApiExceptionMatcher.assertFutureThrowsCode;
-import static com.google.cloud.pubsublite.internal.wire.RetryingConnectionHelpers.whenFailed;
+import static com.google.cloud.pubsublite.internal.ApiExceptionMatcher.assertThrowableMatches;
+import static com.google.cloud.pubsublite.internal.testing.RetryingConnectionHelpers.whenFailed;
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.google.api.core.ApiFuture;
-import com.google.api.core.ApiService.Listener;
+import com.google.api.core.SettableApiFuture;
 import com.google.api.gax.rpc.ResponseObserver;
 import com.google.api.gax.rpc.StatusCode.Code;
 import com.google.cloud.pubsublite.CloudRegion;
@@ -45,19 +42,19 @@ import com.google.cloud.pubsublite.ProjectNumber;
 import com.google.cloud.pubsublite.SequencedMessage;
 import com.google.cloud.pubsublite.SubscriptionName;
 import com.google.cloud.pubsublite.SubscriptionPath;
-import com.google.cloud.pubsublite.internal.ApiExceptionMatcher;
+import com.google.cloud.pubsublite.internal.AlarmFactory;
 import com.google.cloud.pubsublite.internal.CheckedApiException;
-import com.google.cloud.pubsublite.internal.wire.ConnectedSubscriber.Response;
+import com.google.cloud.pubsublite.internal.testing.TestResetSignal;
 import com.google.cloud.pubsublite.proto.Cursor;
 import com.google.cloud.pubsublite.proto.FlowControlRequest;
 import com.google.cloud.pubsublite.proto.InitialSubscribeRequest;
 import com.google.cloud.pubsublite.proto.SeekRequest;
+import com.google.cloud.pubsublite.proto.SeekRequest.NamedTarget;
 import com.google.cloud.pubsublite.proto.SubscribeRequest;
 import com.google.cloud.pubsublite.proto.SubscribeResponse;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.util.Timestamps;
-import java.util.concurrent.CountDownLatch;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import org.junit.Before;
@@ -65,35 +62,41 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
 
 @RunWith(JUnit4.class)
 public class SubscriberImplTest {
+  private static final InitialSubscribeRequest BASE_INITIAL_SUBSCRIBE_REQUEST =
+      InitialSubscribeRequest.newBuilder()
+          .setSubscription(
+              SubscriptionPath.newBuilder()
+                  .setProject(ProjectNumber.of(12345))
+                  .setLocation(CloudZone.of(CloudRegion.of("us-east1"), 'a'))
+                  .setName(SubscriptionName.of("some_subscription"))
+                  .build()
+                  .toString())
+          .setPartition(1024)
+          .build();
+  private static final SeekRequest INITIAL_LOCATION =
+      SeekRequest.newBuilder().setNamedTarget(NamedTarget.COMMITTED_CURSOR).build();
+
   private static SubscribeRequest initialRequest() {
     return SubscribeRequest.newBuilder()
-        .setInitial(
-            InitialSubscribeRequest.newBuilder()
-                .setSubscription(
-                    SubscriptionPath.newBuilder()
-                        .setProject(ProjectNumber.of(12345))
-                        .setLocation(CloudZone.of(CloudRegion.of("us-east1"), 'a'))
-                        .setName(SubscriptionName.of("some_subscription"))
-                        .build()
-                        .toString())
-                .setPartition(1024))
+        .setInitial(BASE_INITIAL_SUBSCRIBE_REQUEST.toBuilder().setInitialLocation(INITIAL_LOCATION))
         .build();
   }
 
   @Mock private StreamFactory<SubscribeRequest, SubscribeResponse> unusedStreamFactory;
-  @Mock private ConnectedSubscriber mockConnectedSubscriber;
+  @Mock private ConnectedSubscriber mockConnectedSubscriber1;
+  @Mock private ConnectedSubscriber mockConnectedSubscriber2;
   @Mock private ConnectedSubscriberFactory mockSubscriberFactory;
+  @Mock private AlarmFactory alarmFactory;
 
-  @Mock Consumer<ImmutableList<SequencedMessage>> mockMessageConsumer;
-
-  private final Listener permanentErrorHandler = mock(Listener.class);
+  @Mock private Consumer<List<SequencedMessage>> mockMessageConsumer;
+  @Mock private SubscriberResetHandler mockResetHandler;
 
   private SubscriberImpl subscriber;
-  private ResponseObserver<Response> leakedResponseObserver;
+  private ResponseObserver<List<SequencedMessage>> leakedResponseObserver;
+  private Runnable leakedFlowControlAlarm;
 
   @Before
   public void setUp() throws CheckedApiException {
@@ -101,32 +104,26 @@ public class SubscriberImplTest {
     doAnswer(
             args -> {
               leakedResponseObserver = args.getArgument(1);
-              return mockConnectedSubscriber;
+              return mockConnectedSubscriber1;
             })
         .when(mockSubscriberFactory)
         .New(any(), any(), eq(initialRequest()));
+    when(alarmFactory.newAlarm(any()))
+        .thenAnswer(
+            args -> {
+              leakedFlowControlAlarm = args.getArgument(0);
+              return SettableApiFuture.create();
+            });
     subscriber =
         new SubscriberImpl(
             unusedStreamFactory,
             mockSubscriberFactory,
-            initialRequest().getInitial(),
-            mockMessageConsumer);
-    subscriber.addListener(permanentErrorHandler, MoreExecutors.directExecutor());
+            alarmFactory,
+            BASE_INITIAL_SUBSCRIBE_REQUEST,
+            INITIAL_LOCATION,
+            mockMessageConsumer,
+            mockResetHandler);
     subscriber.startAsync().awaitRunning();
-    verify(mockSubscriberFactory).New(any(), any(), eq(initialRequest()));
-    verifyNoMoreInteractions(mockSubscriberFactory);
-  }
-
-  @Test
-  public void stopAbortsSeek() throws Exception {
-    ApiFuture<Offset> future =
-        subscriber.seek(
-            SeekRequest.newBuilder().setNamedTarget(SeekRequest.NamedTarget.HEAD).build());
-    assertThat(subscriber.seekInFlight()).isTrue();
-
-    subscriber.stopAsync();
-    subscriber.awaitTerminated();
-    assertFutureThrowsCode(future, Code.ABORTED);
   }
 
   @Test
@@ -134,6 +131,7 @@ public class SubscriberImplTest {
     assertThrows(
         CheckedApiException.class,
         () -> subscriber.allowFlow(FlowControlRequest.newBuilder().setAllowedBytes(-1).build()));
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   FlowControlRequest bigFlowControlRequest() {
@@ -146,80 +144,70 @@ public class SubscriberImplTest {
   @Test
   public void anyFlowAllowedAndProxies() throws CheckedApiException {
     subscriber.allowFlow(bigFlowControlRequest());
-    verify(mockConnectedSubscriber).allowFlow(bigFlowControlRequest());
+    verify(mockConnectedSubscriber1).allowFlow(bigFlowControlRequest());
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
   public void batchesFlowControlRequests() throws Exception {
-    CountDownLatch allowFlowLatch = new CountDownLatch(2);
-    doAnswer(
-            (Answer<Void>)
-                args -> {
-                  allowFlowLatch.countDown();
-                  return null;
-                })
-        .when(mockConnectedSubscriber)
-        .allowFlow(any());
-
     FlowControlRequest initialFlowRequest =
         FlowControlRequest.newBuilder().setAllowedBytes(10000).setAllowedMessages(1000).build();
     subscriber.allowFlow(initialFlowRequest);
-    verify(mockConnectedSubscriber).allowFlow(initialFlowRequest);
+    verify(mockConnectedSubscriber1).allowFlow(initialFlowRequest);
 
     FlowControlRequest deltaFlowRequest =
         FlowControlRequest.newBuilder().setAllowedBytes(100).setAllowedMessages(10).build();
     subscriber.allowFlow(deltaFlowRequest);
     subscriber.allowFlow(deltaFlowRequest);
-    verifyZeroInteractions(mockConnectedSubscriber);
+    verifyNoMoreInteractions(mockConnectedSubscriber1);
 
-    allowFlowLatch.await(SubscriberImpl.FLOW_REQUESTS_FLUSH_INTERVAL_MS * 4, MILLISECONDS);
+    leakedFlowControlAlarm.run();
     FlowControlRequest expectedBatchFlowRequest =
         FlowControlRequest.newBuilder().setAllowedBytes(200).setAllowedMessages(20).build();
-    verify(mockConnectedSubscriber).allowFlow(expectedBatchFlowRequest);
+    verify(mockConnectedSubscriber1).allowFlow(expectedBatchFlowRequest);
 
-    subscriber.processBatchFlowRequest();
-    verifyNoMoreInteractions(mockConnectedSubscriber);
+    leakedFlowControlAlarm.run();
+    verifyNoMoreInteractions(mockConnectedSubscriber1);
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
   public void messagesEmpty_IsError() throws Exception {
-    Future<Void> failed = whenFailed(permanentErrorHandler);
+    Future<Void> failed = whenFailed(subscriber);
     subscriber.allowFlow(bigFlowControlRequest());
-    leakedResponseObserver.onResponse(Response.ofMessages(ImmutableList.of()));
+    leakedResponseObserver.onResponse(ImmutableList.of());
     assertThrows(IllegalStateException.class, subscriber::awaitTerminated);
     failed.get();
-    verify(permanentErrorHandler)
-        .failed(any(), argThat(new ApiExceptionMatcher(Code.INVALID_ARGUMENT)));
+    assertThrowableMatches(subscriber.failureCause(), Code.INVALID_ARGUMENT);
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
   public void messagesUnordered_IsError() throws Exception {
-    Future<Void> failed = whenFailed(permanentErrorHandler);
+    Future<Void> failed = whenFailed(subscriber);
     subscriber.allowFlow(bigFlowControlRequest());
     leakedResponseObserver.onResponse(
-        Response.ofMessages(
-            ImmutableList.of(
-                SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 10),
-                SequencedMessage.of(
-                    Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 10))));
+        ImmutableList.of(
+            SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 10),
+            SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 10)));
     assertThrows(IllegalStateException.class, subscriber::awaitTerminated);
     failed.get();
-    verify(permanentErrorHandler)
-        .failed(any(), argThat(new ApiExceptionMatcher(Code.INVALID_ARGUMENT)));
+    assertThrowableMatches(subscriber.failureCause(), Code.INVALID_ARGUMENT);
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
   public void messageBatchesOutOfOrder_IsError() throws Exception {
-    Future<Void> failed = whenFailed(permanentErrorHandler);
+    Future<Void> failed = whenFailed(subscriber);
     subscriber.allowFlow(bigFlowControlRequest());
     ImmutableList<SequencedMessage> messages =
         ImmutableList.of(
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 0));
-    leakedResponseObserver.onResponse(Response.ofMessages(messages));
-    leakedResponseObserver.onResponse(Response.ofMessages(messages));
+    leakedResponseObserver.onResponse(messages);
+    leakedResponseObserver.onResponse(messages);
     failed.get();
-    verify(permanentErrorHandler)
-        .failed(any(), argThat(new ApiExceptionMatcher(Code.FAILED_PRECONDITION)));
+    assertThrowableMatches(subscriber.failureCause(), Code.FAILED_PRECONDITION);
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
@@ -229,19 +217,20 @@ public class SubscriberImplTest {
         ImmutableList.of(
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 10),
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 10));
-    leakedResponseObserver.onResponse(Response.ofMessages(messages));
+    leakedResponseObserver.onResponse(messages);
 
     verify(mockMessageConsumer).accept(messages);
-    verify(permanentErrorHandler, times(0)).failed(any(), any());
+    assertThat(subscriber.isRunning()).isTrue();
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
   public void messageResponseSubtracts() throws Exception {
-    Future<Void> failed = whenFailed(permanentErrorHandler);
+    Future<Void> failed = whenFailed(subscriber);
     FlowControlRequest request =
         FlowControlRequest.newBuilder().setAllowedBytes(100).setAllowedMessages(100).build();
     subscriber.allowFlow(request);
-    verify(mockConnectedSubscriber).allowFlow(request);
+    verify(mockConnectedSubscriber1).allowFlow(request);
     ImmutableList<SequencedMessage> messages1 =
         ImmutableList.of(
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 98),
@@ -249,45 +238,125 @@ public class SubscriberImplTest {
     ImmutableList<SequencedMessage> messages2 =
         ImmutableList.of(
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(3), 2));
-    leakedResponseObserver.onResponse(Response.ofMessages(messages1));
+    leakedResponseObserver.onResponse(messages1);
     verify(mockMessageConsumer).accept(messages1);
-    verify(permanentErrorHandler, times(0)).failed(any(), any());
-    leakedResponseObserver.onResponse(Response.ofMessages(messages2));
+    assertThat(subscriber.isRunning()).isTrue();
+    leakedResponseObserver.onResponse(messages2);
     failed.get();
-    verify(permanentErrorHandler)
-        .failed(any(), argThat(new ApiExceptionMatcher(Code.FAILED_PRECONDITION)));
+    assertThrowableMatches(subscriber.failureCause(), Code.FAILED_PRECONDITION);
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 
   @Test
-  public void reinitialize_resendsInFlightSeek() {
-    Offset offset = Offset.of(1);
-    SeekRequest seekRequest =
-        SeekRequest.newBuilder().setCursor(Cursor.newBuilder().setOffset(offset.value())).build();
-    ApiFuture<Offset> future = subscriber.seek(seekRequest);
-    assertThat(subscriber.seekInFlight()).isTrue();
-
-    subscriber.triggerReinitialize();
-    verify(mockConnectedSubscriber, times(2)).seek(seekRequest);
-
-    leakedResponseObserver.onResponse(Response.ofSeekOffset(offset));
-    assertTrue(future.isDone());
-    assertThat(subscriber.seekInFlight()).isFalse();
-  }
-
-  @Test
-  public void reinitialize_sendsNextOffsetSeek() throws Exception {
-    subscriber.allowFlow(bigFlowControlRequest());
+  public void reinitialize_reconnectsToNextOffset() throws Exception {
+    subscriber.allowFlow(
+        FlowControlRequest.newBuilder().setAllowedBytes(100).setAllowedMessages(100).build());
     ImmutableList<SequencedMessage> messages =
         ImmutableList.of(
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 10),
             SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 10));
-    leakedResponseObserver.onResponse(Response.ofMessages(messages));
+    leakedResponseObserver.onResponse(messages);
     verify(mockMessageConsumer).accept(messages);
 
-    subscriber.triggerReinitialize();
-    verify(mockConnectedSubscriber)
-        .seek(SeekRequest.newBuilder().setCursor(Cursor.newBuilder().setOffset(2)).build());
-    assertThat(subscriber.seekInFlight()).isFalse();
-    leakedResponseObserver.onResponse(Response.ofSeekOffset(Offset.of(2)));
+    final SubscribeRequest nextOffsetRequest =
+        SubscribeRequest.newBuilder()
+            .setInitial(
+                BASE_INITIAL_SUBSCRIBE_REQUEST
+                    .toBuilder()
+                    .setInitialLocation(
+                        SeekRequest.newBuilder().setCursor(Cursor.newBuilder().setOffset(2))))
+            .build();
+    doAnswer(
+            args -> {
+              leakedResponseObserver = args.getArgument(1);
+              return mockConnectedSubscriber2;
+            })
+        .when(mockSubscriberFactory)
+        .New(any(), any(), eq(nextOffsetRequest));
+    subscriber.triggerReinitialize(new CheckedApiException(Code.ABORTED));
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(nextOffsetRequest));
+    verify(mockConnectedSubscriber2)
+        .allowFlow(
+            FlowControlRequest.newBuilder().setAllowedBytes(80).setAllowedMessages(98).build());
+  }
+
+  @Test
+  public void reinitialize_handlesSuccessfulReset() throws Exception {
+    subscriber.allowFlow(
+        FlowControlRequest.newBuilder().setAllowedBytes(100).setAllowedMessages(100).build());
+    ImmutableList<SequencedMessage> messages =
+        ImmutableList.of(
+            SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 10),
+            SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 10));
+    leakedResponseObserver.onResponse(messages);
+    verify(mockMessageConsumer).accept(messages);
+
+    doAnswer(
+            args -> {
+              leakedResponseObserver = args.getArgument(1);
+              return mockConnectedSubscriber2;
+            })
+        .when(mockSubscriberFactory)
+        .New(any(), any(), eq(initialRequest()));
+
+    // If the RESET signal is received and subscriber reset is handled, the subscriber should read
+    // from the committed cursor upon reconnect.
+    when(mockResetHandler.handleReset()).thenReturn(true);
+    subscriber.triggerReinitialize(TestResetSignal.newCheckedException());
+    verify(mockSubscriberFactory, times(2)).New(any(), any(), eq(initialRequest()));
+    verify(mockConnectedSubscriber2)
+        .allowFlow(
+            FlowControlRequest.newBuilder().setAllowedBytes(80).setAllowedMessages(98).build());
+  }
+
+  @Test
+  public void reinitialize_handlesIgnoredReset() throws Exception {
+    subscriber.allowFlow(
+        FlowControlRequest.newBuilder().setAllowedBytes(100).setAllowedMessages(100).build());
+    ImmutableList<SequencedMessage> messages =
+        ImmutableList.of(
+            SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(0), 10),
+            SequencedMessage.of(Message.builder().build(), Timestamps.EPOCH, Offset.of(1), 10));
+    leakedResponseObserver.onResponse(messages);
+    verify(mockMessageConsumer).accept(messages);
+
+    final SubscribeRequest nextOffsetRequest =
+        SubscribeRequest.newBuilder()
+            .setInitial(
+                BASE_INITIAL_SUBSCRIBE_REQUEST
+                    .toBuilder()
+                    .setInitialLocation(
+                        SeekRequest.newBuilder().setCursor(Cursor.newBuilder().setOffset(2))))
+            .build();
+    doAnswer(
+            args -> {
+              leakedResponseObserver = args.getArgument(1);
+              return mockConnectedSubscriber2;
+            })
+        .when(mockSubscriberFactory)
+        .New(any(), any(), eq(nextOffsetRequest));
+
+    // If the RESET signal is received and subscriber reset is ignored, the subscriber should read
+    // from the next offset upon reconnect.
+    when(mockResetHandler.handleReset()).thenReturn(false);
+    subscriber.triggerReinitialize(TestResetSignal.newCheckedException());
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(nextOffsetRequest));
+    verify(mockConnectedSubscriber2)
+        .allowFlow(
+            FlowControlRequest.newBuilder().setAllowedBytes(80).setAllowedMessages(98).build());
+  }
+
+  @Test
+  public void reinitialize_handlesResetFailure() throws Exception {
+    Future<Void> failed = whenFailed(subscriber);
+    // If the RESET signal is received and subscriber reset fails, the subscriber should permanently
+    // shut down.
+    doThrow(new CheckedApiException(Code.UNAVAILABLE)).when(mockResetHandler).handleReset();
+    subscriber.triggerReinitialize(TestResetSignal.newCheckedException());
+    failed.get();
+    assertThrowableMatches(subscriber.failureCause(), Code.UNAVAILABLE);
+    verify(mockSubscriberFactory, times(1)).New(any(), any(), eq(initialRequest()));
   }
 }

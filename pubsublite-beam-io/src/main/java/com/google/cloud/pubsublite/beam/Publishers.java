@@ -26,6 +26,7 @@ import com.google.cloud.pubsublite.AdminClient;
 import com.google.cloud.pubsublite.AdminClientSettings;
 import com.google.cloud.pubsublite.MessageMetadata;
 import com.google.cloud.pubsublite.Partition;
+import com.google.cloud.pubsublite.cloudpubsub.PublisherSettings;
 import com.google.cloud.pubsublite.internal.Publisher;
 import com.google.cloud.pubsublite.internal.wire.PartitionCountWatchingPublisherSettings;
 import com.google.cloud.pubsublite.internal.wire.PubsubContext;
@@ -50,9 +51,9 @@ class Publishers {
               .setServiceClient(
                   AdminServiceClient.create(
                       addDefaultSettings(
-                          options.topicPath().location().region(),
+                          options.topicPath().location().extractRegion(),
                           AdminServiceSettings.newBuilder())))
-              .setRegion(options.topicPath().location().region())
+              .setRegion(options.topicPath().location().extractRegion())
               .build());
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
@@ -69,7 +70,7 @@ class Publishers {
             settingsBuilder);
     try {
       return PublisherServiceClient.create(
-          addDefaultSettings(options.topicPath().location().region(), settingsBuilder));
+          addDefaultSettings(options.topicPath().location().extractRegion(), settingsBuilder));
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
     }
@@ -92,6 +93,7 @@ class Publishers {
                     .setTopic(options.topicPath())
                     .setPartition(partition)
                     .setServiceClient(newServiceClient(options, partition))
+                    .setBatchingSettings(PublisherSettings.DEFAULT_BATCHING_SETTINGS)
                     .build())
         .setAdminClient(newAdminClient(options))
         .build()

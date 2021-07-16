@@ -26,9 +26,12 @@ import com.google.cloud.pubsublite.ProjectNumber;
 import com.google.cloud.pubsublite.SequencedMessage;
 import com.google.cloud.pubsublite.SubscriptionName;
 import com.google.cloud.pubsublite.SubscriptionPath;
+import com.google.cloud.pubsublite.proto.SeekRequest;
+import com.google.cloud.pubsublite.proto.SeekRequest.NamedTarget;
 import com.google.cloud.pubsublite.v1.SubscriberServiceClient;
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.function.Consumer;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,11 +39,15 @@ import org.mockito.Mock;
 
 @RunWith(JUnit4.class)
 public class SubscriberBuilderTest {
-  @Mock public Consumer<ImmutableList<SequencedMessage>> mockConsumer;
+  @Mock public Consumer<List<SequencedMessage>> mockConsumer;
+
+  @Before
+  public void setUp() {
+    initMocks(this);
+  }
 
   @Test
-  public void testBuilder() {
-    initMocks(this);
+  public void testBuilder_setAll() {
     Subscriber unusedSubscriber =
         SubscriberBuilder.newBuilder()
             .setSubscriptionPath(
@@ -52,6 +59,27 @@ public class SubscriberBuilderTest {
             .setMessageConsumer(mockConsumer)
             .setPartition(Partition.of(3))
             .setServiceClient(mock(SubscriberServiceClient.class))
+            .setInitialLocation(
+                SeekRequest.newBuilder().setNamedTarget(NamedTarget.COMMITTED_CURSOR).build())
+            .setResetHandler(SubscriberResetHandler::unhandled)
+            .build();
+  }
+
+  @Test
+  public void testBuilder_omitOptionalFields() {
+    Subscriber unusedSubscriber =
+        SubscriberBuilder.newBuilder()
+            .setSubscriptionPath(
+                SubscriptionPath.newBuilder()
+                    .setLocation(CloudZone.of(CloudRegion.of("us-central1"), 'a'))
+                    .setProject(ProjectNumber.of(3))
+                    .setName(SubscriptionName.of("abc"))
+                    .build())
+            .setMessageConsumer(mockConsumer)
+            .setPartition(Partition.of(3))
+            .setServiceClient(mock(SubscriberServiceClient.class))
+            .setInitialLocation(
+                SeekRequest.newBuilder().setNamedTarget(NamedTarget.COMMITTED_CURSOR).build())
             .build();
   }
 }

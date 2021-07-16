@@ -16,6 +16,8 @@
 
 package com.google.cloud.pubsublite.v1;
 
+import static com.google.cloud.pubsublite.v1.AdminServiceClient.ListReservationTopicsPagedResponse;
+import static com.google.cloud.pubsublite.v1.AdminServiceClient.ListReservationsPagedResponse;
 import static com.google.cloud.pubsublite.v1.AdminServiceClient.ListSubscriptionsPagedResponse;
 import static com.google.cloud.pubsublite.v1.AdminServiceClient.ListTopicSubscriptionsPagedResponse;
 import static com.google.cloud.pubsublite.v1.AdminServiceClient.ListTopicsPagedResponse;
@@ -28,28 +30,42 @@ import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
 import com.google.api.gax.rpc.ApiClientHeaderProvider;
 import com.google.api.gax.rpc.ClientContext;
 import com.google.api.gax.rpc.ClientSettings;
+import com.google.api.gax.rpc.OperationCallSettings;
 import com.google.api.gax.rpc.PagedCallSettings;
 import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.api.gax.rpc.UnaryCallSettings;
+import com.google.cloud.pubsublite.proto.CreateReservationRequest;
 import com.google.cloud.pubsublite.proto.CreateSubscriptionRequest;
 import com.google.cloud.pubsublite.proto.CreateTopicRequest;
+import com.google.cloud.pubsublite.proto.DeleteReservationRequest;
 import com.google.cloud.pubsublite.proto.DeleteSubscriptionRequest;
 import com.google.cloud.pubsublite.proto.DeleteTopicRequest;
+import com.google.cloud.pubsublite.proto.GetReservationRequest;
 import com.google.cloud.pubsublite.proto.GetSubscriptionRequest;
 import com.google.cloud.pubsublite.proto.GetTopicPartitionsRequest;
 import com.google.cloud.pubsublite.proto.GetTopicRequest;
+import com.google.cloud.pubsublite.proto.ListReservationTopicsRequest;
+import com.google.cloud.pubsublite.proto.ListReservationTopicsResponse;
+import com.google.cloud.pubsublite.proto.ListReservationsRequest;
+import com.google.cloud.pubsublite.proto.ListReservationsResponse;
 import com.google.cloud.pubsublite.proto.ListSubscriptionsRequest;
 import com.google.cloud.pubsublite.proto.ListSubscriptionsResponse;
 import com.google.cloud.pubsublite.proto.ListTopicSubscriptionsRequest;
 import com.google.cloud.pubsublite.proto.ListTopicSubscriptionsResponse;
 import com.google.cloud.pubsublite.proto.ListTopicsRequest;
 import com.google.cloud.pubsublite.proto.ListTopicsResponse;
+import com.google.cloud.pubsublite.proto.OperationMetadata;
+import com.google.cloud.pubsublite.proto.Reservation;
+import com.google.cloud.pubsublite.proto.SeekSubscriptionRequest;
+import com.google.cloud.pubsublite.proto.SeekSubscriptionResponse;
 import com.google.cloud.pubsublite.proto.Subscription;
 import com.google.cloud.pubsublite.proto.Topic;
 import com.google.cloud.pubsublite.proto.TopicPartitions;
+import com.google.cloud.pubsublite.proto.UpdateReservationRequest;
 import com.google.cloud.pubsublite.proto.UpdateSubscriptionRequest;
 import com.google.cloud.pubsublite.proto.UpdateTopicRequest;
 import com.google.cloud.pubsublite.v1.stub.AdminServiceStubSettings;
+import com.google.longrunning.Operation;
 import com.google.protobuf.Empty;
 import java.io.IOException;
 import java.util.List;
@@ -155,6 +171,53 @@ public class AdminServiceSettings extends ClientSettings<AdminServiceSettings> {
   /** Returns the object with the settings used for calls to deleteSubscription. */
   public UnaryCallSettings<DeleteSubscriptionRequest, Empty> deleteSubscriptionSettings() {
     return ((AdminServiceStubSettings) getStubSettings()).deleteSubscriptionSettings();
+  }
+
+  /** Returns the object with the settings used for calls to seekSubscription. */
+  public UnaryCallSettings<SeekSubscriptionRequest, Operation> seekSubscriptionSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).seekSubscriptionSettings();
+  }
+
+  /** Returns the object with the settings used for calls to seekSubscription. */
+  public OperationCallSettings<SeekSubscriptionRequest, SeekSubscriptionResponse, OperationMetadata>
+      seekSubscriptionOperationSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).seekSubscriptionOperationSettings();
+  }
+
+  /** Returns the object with the settings used for calls to createReservation. */
+  public UnaryCallSettings<CreateReservationRequest, Reservation> createReservationSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).createReservationSettings();
+  }
+
+  /** Returns the object with the settings used for calls to getReservation. */
+  public UnaryCallSettings<GetReservationRequest, Reservation> getReservationSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).getReservationSettings();
+  }
+
+  /** Returns the object with the settings used for calls to listReservations. */
+  public PagedCallSettings<
+          ListReservationsRequest, ListReservationsResponse, ListReservationsPagedResponse>
+      listReservationsSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).listReservationsSettings();
+  }
+
+  /** Returns the object with the settings used for calls to updateReservation. */
+  public UnaryCallSettings<UpdateReservationRequest, Reservation> updateReservationSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).updateReservationSettings();
+  }
+
+  /** Returns the object with the settings used for calls to deleteReservation. */
+  public UnaryCallSettings<DeleteReservationRequest, Empty> deleteReservationSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).deleteReservationSettings();
+  }
+
+  /** Returns the object with the settings used for calls to listReservationTopics. */
+  public PagedCallSettings<
+          ListReservationTopicsRequest,
+          ListReservationTopicsResponse,
+          ListReservationTopicsPagedResponse>
+      listReservationTopicsSettings() {
+    return ((AdminServiceStubSettings) getStubSettings()).listReservationTopicsSettings();
   }
 
   public static final AdminServiceSettings create(AdminServiceStubSettings stub)
@@ -325,6 +388,57 @@ public class AdminServiceSettings extends ClientSettings<AdminServiceSettings> {
     public UnaryCallSettings.Builder<DeleteSubscriptionRequest, Empty>
         deleteSubscriptionSettings() {
       return getStubSettingsBuilder().deleteSubscriptionSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to seekSubscription. */
+    public UnaryCallSettings.Builder<SeekSubscriptionRequest, Operation>
+        seekSubscriptionSettings() {
+      return getStubSettingsBuilder().seekSubscriptionSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to seekSubscription. */
+    public OperationCallSettings.Builder<
+            SeekSubscriptionRequest, SeekSubscriptionResponse, OperationMetadata>
+        seekSubscriptionOperationSettings() {
+      return getStubSettingsBuilder().seekSubscriptionOperationSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to createReservation. */
+    public UnaryCallSettings.Builder<CreateReservationRequest, Reservation>
+        createReservationSettings() {
+      return getStubSettingsBuilder().createReservationSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to getReservation. */
+    public UnaryCallSettings.Builder<GetReservationRequest, Reservation> getReservationSettings() {
+      return getStubSettingsBuilder().getReservationSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to listReservations. */
+    public PagedCallSettings.Builder<
+            ListReservationsRequest, ListReservationsResponse, ListReservationsPagedResponse>
+        listReservationsSettings() {
+      return getStubSettingsBuilder().listReservationsSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to updateReservation. */
+    public UnaryCallSettings.Builder<UpdateReservationRequest, Reservation>
+        updateReservationSettings() {
+      return getStubSettingsBuilder().updateReservationSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to deleteReservation. */
+    public UnaryCallSettings.Builder<DeleteReservationRequest, Empty> deleteReservationSettings() {
+      return getStubSettingsBuilder().deleteReservationSettings();
+    }
+
+    /** Returns the builder for the settings used for calls to listReservationTopics. */
+    public PagedCallSettings.Builder<
+            ListReservationTopicsRequest,
+            ListReservationTopicsResponse,
+            ListReservationTopicsPagedResponse>
+        listReservationTopicsSettings() {
+      return getStubSettingsBuilder().listReservationTopicsSettings();
     }
 
     @Override

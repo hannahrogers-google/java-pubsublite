@@ -17,8 +17,13 @@
 package com.google.cloud.pubsublite;
 
 import com.google.api.core.ApiFuture;
+import com.google.api.core.BetaApi;
+import com.google.api.gax.longrunning.OperationFuture;
 import com.google.api.gax.rpc.ApiException;
 import com.google.cloud.pubsublite.internal.ApiBackgroundResource;
+import com.google.cloud.pubsublite.proto.OperationMetadata;
+import com.google.cloud.pubsublite.proto.Reservation;
+import com.google.cloud.pubsublite.proto.SeekSubscriptionResponse;
 import com.google.cloud.pubsublite.proto.Subscription;
 import com.google.cloud.pubsublite.proto.Topic;
 import com.google.protobuf.FieldMask;
@@ -166,6 +171,25 @@ public interface AdminClient extends ApiBackgroundResource {
   ApiFuture<Subscription> updateSubscription(Subscription subscription, FieldMask mask);
 
   /**
+   * Initiate an out-of-band seek for a subscription to a specified target, which may be timestamps
+   * or named positions within the message backlog.
+   *
+   * <p>See https://cloud.google.com/pubsub/lite/docs/seek for more information.
+   *
+   * @param path The path of the subscription to seek.
+   * @param target The location to seek to.
+   * @return A {@link com.google.api.gax.longrunning.OperationFuture} that returns an operation name
+   *     if the seek was successfully initiated, or otherwise throw an {@link
+   *     com.google.api.gax.rpc.ApiException}. {@link
+   *     com.google.api.gax.longrunning.OperationFuture.get()} will return a response if the seek
+   *     operation completes successfully, or otherwise throw an {@link
+   *     com.google.api.gax.rpc.ApiException}.
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  OperationFuture<SeekSubscriptionResponse, OperationMetadata> seekSubscription(
+      SubscriptionPath path, SeekTarget target);
+
+  /**
    * Delete the subscription with id {@code id} if it exists.
    *
    * @param path The path of the subscription to retrieve.
@@ -174,4 +198,68 @@ public interface AdminClient extends ApiBackgroundResource {
    *     exception with status {@link com.google.api.gax.rpc.StatusCode.Code#NOT_FOUND}
    */
   ApiFuture<Void> deleteSubscription(SubscriptionPath path);
+
+  /**
+   * Create the provided reservation if it does not yet exist.
+   *
+   * @param reservation The reservation to create.
+   * @return A future that will have either an error {@link com.google.api.gax.rpc.ApiException} or
+   *     the reservation on success.
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  ApiFuture<Reservation> createReservation(Reservation reservation);
+
+  /**
+   * Get the reservation with id {@code id} if it exists.
+   *
+   * @param path The path of the reservation to retrieve.
+   * @return A future that will have either an error {@link com.google.api.gax.rpc.ApiException} or
+   *     the reservation on success.
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  ApiFuture<Reservation> getReservation(ReservationPath path);
+
+  /**
+   * List all reservations for the specified project.
+   *
+   * @param path The path of the project to list reservations for.
+   * @return A future that will have either an error {@link com.google.api.gax.rpc.ApiException} or
+   *     the list of reservation paths on success.
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  ApiFuture<List<Reservation>> listReservations(LocationPath path);
+
+  /**
+   * Update the reservation with path {@code reservation.getPath()} if it exists.
+   *
+   * @param reservation The reservation to update.
+   * @param mask The mask indicating which fields should be updated.
+   * @return A future that will have either an error {@link com.google.api.gax.rpc.ApiException} or
+   *     the resulting reservation on success. Updating nonexistent reservations will cause the
+   *     future to have an exception with status {@link
+   *     com.google.api.gax.rpc.StatusCode.Code#NOT_FOUND}
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  ApiFuture<Reservation> updateReservation(Reservation reservation, FieldMask mask);
+
+  /**
+   * Delete the reservation with id {@code id} if it exists.
+   *
+   * @param path The path of the reservation to retrieve.
+   * @return A future that will have either an error {@link com.google.api.gax.rpc.ApiException} or
+   *     void on success. Deleting nonexistent reservations will cause the future to have an
+   *     exception with status {@link com.google.api.gax.rpc.StatusCode.Code#NOT_FOUND}
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  ApiFuture<Void> deleteReservation(ReservationPath path);
+
+  /**
+   * Get the list of topics for the reservation with id {@code id} if it exists.
+   *
+   * @param path The path of the reservation to retrieve.
+   * @return A future that will have either an error {@link com.google.api.gax.rpc.ApiException} or
+   *     the list of topics on success.
+   */
+  @BetaApi("This may not be implemented in the backend, it is a pre-release feature.")
+  ApiFuture<List<TopicPath>> listReservationTopics(ReservationPath path);
 }

@@ -42,6 +42,8 @@ import com.google.cloud.pubsublite.internal.wire.PubsubContext;
 import com.google.cloud.pubsublite.internal.wire.PubsubContext.Framework;
 import com.google.cloud.pubsublite.internal.wire.RoutingMetadata;
 import com.google.cloud.pubsublite.internal.wire.SubscriberBuilder;
+import com.google.cloud.pubsublite.proto.SeekRequest;
+import com.google.cloud.pubsublite.proto.SeekRequest.NamedTarget;
 import com.google.cloud.pubsublite.v1.CursorServiceClient;
 import com.google.cloud.pubsublite.v1.CursorServiceSettings;
 import com.google.cloud.pubsublite.v1.PartitionAssignmentServiceClient;
@@ -60,9 +62,6 @@ import java.util.function.Supplier;
  */
 @AutoValue
 public abstract class SubscriberSettings {
-
-  private static final Framework FRAMEWORK = Framework.of("CLOUD_PUBSUB_SHIM");
-
   // Required parameters.
   /**
    * The receiver which handles new messages sent by the Pub/Sub Lite system. Only one downcall from
@@ -98,6 +97,11 @@ public abstract class SubscriberSettings {
   abstract CredentialsProvider credentialsProvider();
 
   /**
+   * A Framework tag for internal metrics. Please set this if integrating with a public framework!
+   */
+  abstract Framework framework();
+
+  /**
    * A supplier for new SubscriberServiceClients. Should return a new client each time. If present,
    * ignores CredentialsProvider.
    */
@@ -124,6 +128,7 @@ public abstract class SubscriberSettings {
 
   public static Builder newBuilder() {
     return new AutoValue_SubscriberSettings.Builder()
+        .setFramework(Framework.of("CLOUD_PUBSUB_SHIM"))
         .setPartitions(ImmutableList.of())
         .setCredentialsProvider(
             SubscriberServiceSettings.defaultCredentialsProviderBuilder().build());
@@ -131,9 +136,7 @@ public abstract class SubscriberSettings {
 
   @AutoValue.Builder
   public abstract static class Builder {
-
     // Required parameters.
-
     /**
      * The receiver which handles new messages sent by the Pub/Sub Lite system. Only one downcall
      * from any connected partition will be outstanding at a time, and blocking in this receiver
@@ -167,6 +170,11 @@ public abstract class SubscriberSettings {
 
     /** A provider for credentials. */
     public abstract Builder setCredentialsProvider(CredentialsProvider provider);
+
+    /**
+     * A Framework tag for internal metrics. Please set this if integrating with a public framework!
+     */
+    public abstract Builder setFramework(Framework framework);
 
     /**
      * A supplier for new SubscriberServiceClients. Should return a new client each time. If
@@ -206,12 +214,13 @@ public abstract class SubscriberSettings {
     try {
       SubscriberServiceSettings.Builder settingsBuilder =
           SubscriberServiceSettings.newBuilder().setCredentialsProvider(credentialsProvider());
-      addDefaultMetadata(
-          PubsubContext.of(FRAMEWORK),
-          RoutingMetadata.of(subscriptionPath(), partition),
-          settingsBuilder);
+      settingsBuilder =
+          addDefaultMetadata(
+              PubsubContext.of(framework()),
+              RoutingMetadata.of(subscriptionPath(), partition),
+              settingsBuilder);
       return SubscriberServiceClient.create(
-          addDefaultSettings(subscriptionPath().location().region(), settingsBuilder));
+          addDefaultSettings(subscriptionPath().location().extractRegion(), settingsBuilder));
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
     }
@@ -224,7 +233,7 @@ public abstract class SubscriberSettings {
     try {
       return CursorServiceClient.create(
           addDefaultSettings(
-              subscriptionPath().location().region(),
+              subscriptionPath().location().extractRegion(),
               CursorServiceSettings.newBuilder().setCredentialsProvider(credentialsProvider())));
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
@@ -237,7 +246,9 @@ public abstract class SubscriberSettings {
           SubscriberBuilder.newBuilder()
               .setPartition(partition)
               .setSubscriptionPath(subscriptionPath())
-              .setServiceClient(newSubscriberServiceClient(partition));
+              .setServiceClient(newSubscriberServiceClient(partition))
+              .setInitialLocation(
+                  SeekRequest.newBuilder().setNamedTarget(NamedTarget.COMMITTED_CURSOR).build());
 
       Committer wireCommitter =
           CommitterSettings.newBuilder()
@@ -253,7 +264,11 @@ public abstract class SubscriberSettings {
               partition, transformer().orElse(MessageTransforms.toCpsSubscribeTransformer())),
           new AckSetTrackerImpl(wireCommitter),
           nackHandler().orElse(new NackHandler() {}),
-          messageConsumer -> wireSubscriberBuilder.setMessageConsumer(messageConsumer).build(),
+          (messageConsumer, resetHandler) ->
+              wireSubscriberBuilder
+                  .setMessageConsumer(messageConsumer)
+                  .setResetHandler(resetHandler)
+                  .build(),
           perPartitionFlowControlSettings());
     } catch (Throwable t) {
       throw toCanonical(t);
@@ -267,7 +282,7 @@ public abstract class SubscriberSettings {
     try {
       return PartitionAssignmentServiceClient.create(
           addDefaultSettings(
-              subscriptionPath().location().region(),
+              subscriptionPath().location().extractRegion(),
               PartitionAssignmentServiceSettings.newBuilder()
                   .setCredentialsProvider(credentialsProvider())));
     } catch (Throwable t) {

@@ -30,12 +30,11 @@ import com.google.cloud.pubsublite.cloudpubsub.Subscriber;
 import com.google.cloud.pubsublite.internal.CheckedApiException;
 import com.google.cloud.pubsublite.internal.ExtractStatus;
 import com.google.cloud.pubsublite.internal.ProxyService;
-import com.google.cloud.pubsublite.internal.wire.SubscriberFactory;
+import com.google.cloud.pubsublite.internal.wire.SystemExecutors;
 import com.google.cloud.pubsublite.proto.FlowControlRequest;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.pubsub.v1.PubsubMessage;
+import java.util.List;
 
 public class SinglePartitionSubscriber extends ProxyService implements Subscriber {
   private final MessageReceiver receiver;
@@ -50,7 +49,7 @@ public class SinglePartitionSubscriber extends ProxyService implements Subscribe
       MessageTransformer<SequencedMessage, PubsubMessage> transformer,
       AckSetTracker ackSetTracker,
       NackHandler nackHandler,
-      SubscriberFactory wireSubscriberFactory,
+      ResettableSubscriberFactory wireSubscriberFactory,
       FlowControlSettings flowControlSettings)
       throws ApiException {
     this.receiver = receiver;
@@ -58,7 +57,8 @@ public class SinglePartitionSubscriber extends ProxyService implements Subscribe
     this.ackSetTracker = ackSetTracker;
     this.nackHandler = nackHandler;
     this.flowControlSettings = flowControlSettings;
-    this.wireSubscriber = wireSubscriberFactory.newSubscriber(this::onMessages);
+    this.wireSubscriber =
+        wireSubscriberFactory.newSubscriber(this::onMessages, this::onSubscriberReset);
     addServices(ackSetTracker, wireSubscriber);
   }
 
@@ -79,7 +79,7 @@ public class SinglePartitionSubscriber extends ProxyService implements Subscribe
   protected void stop() {}
 
   @VisibleForTesting
-  void onMessages(ImmutableList<SequencedMessage> sequencedMessages) {
+  void onMessages(List<SequencedMessage> sequencedMessages) {
     try {
       for (SequencedMessage message : sequencedMessages) {
         PubsubMessage userMessage = transformer.transform(message);
@@ -117,7 +117,7 @@ public class SinglePartitionSubscriber extends ProxyService implements Subscribe
                         ack();
                       }
                     },
-                    MoreExecutors.directExecutor());
+                    SystemExecutors.getFuturesExecutor());
               }
             };
         receiver.receiveMessage(userMessage, clientConsumer);
@@ -125,5 +125,11 @@ public class SinglePartitionSubscriber extends ProxyService implements Subscribe
     } catch (Throwable t) {
       onPermanentError(ExtractStatus.toCanonical(t));
     }
+  }
+
+  @VisibleForTesting
+  boolean onSubscriberReset() throws CheckedApiException {
+    ackSetTracker.waitUntilCommitted();
+    return true;
   }
 }

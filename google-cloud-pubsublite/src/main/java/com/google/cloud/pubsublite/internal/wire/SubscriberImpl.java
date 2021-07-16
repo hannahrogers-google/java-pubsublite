@@ -17,50 +17,48 @@
 package com.google.cloud.pubsublite.internal.wire;
 
 import static com.google.cloud.pubsublite.internal.CheckedApiPreconditions.checkArgument;
-import static com.google.cloud.pubsublite.internal.CheckedApiPreconditions.checkState;
 import static com.google.cloud.pubsublite.internal.wire.ApiServiceUtils.backgroundResourceAsApiService;
 
-import com.google.api.core.ApiFuture;
-import com.google.api.core.ApiFutures;
-import com.google.api.core.SettableApiFuture;
 import com.google.api.gax.rpc.ApiException;
-import com.google.api.gax.rpc.StatusCode.Code;
-import com.google.cloud.pubsublite.Offset;
 import com.google.cloud.pubsublite.SequencedMessage;
+import com.google.cloud.pubsublite.internal.AlarmFactory;
 import com.google.cloud.pubsublite.internal.CheckedApiException;
 import com.google.cloud.pubsublite.internal.CloseableMonitor;
 import com.google.cloud.pubsublite.internal.ProxyService;
-import com.google.cloud.pubsublite.internal.wire.ConnectedSubscriber.Response;
 import com.google.cloud.pubsublite.proto.FlowControlRequest;
 import com.google.cloud.pubsublite.proto.InitialSubscribeRequest;
 import com.google.cloud.pubsublite.proto.SeekRequest;
+import com.google.cloud.pubsublite.proto.SeekRequest.NamedTarget;
 import com.google.cloud.pubsublite.proto.SubscribeRequest;
 import com.google.cloud.pubsublite.proto.SubscribeResponse;
 import com.google.cloud.pubsublite.v1.SubscriberServiceClient;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Monitor;
+import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.concurrent.GuardedBy;
 
 public class SubscriberImpl extends ProxyService
-    implements Subscriber, RetryingConnectionObserver<Response> {
-  @VisibleForTesting static final long FLOW_REQUESTS_FLUSH_INTERVAL_MS = 100;
+    implements Subscriber, RetryingConnectionObserver<List<SequencedMessage>> {
+  private static final Duration FLOW_REQUESTS_FLUSH_INTERVAL = Duration.ofMillis(100);
 
-  private final Consumer<ImmutableList<SequencedMessage>> messageConsumer;
+  private final AlarmFactory alarmFactory;
+
+  private final Consumer<List<SequencedMessage>> messageConsumer;
+
+  private final SubscriberResetHandler resetHandler;
+
+  private final InitialSubscribeRequest baseInitialRequest;
 
   private final CloseableMonitor monitor = new CloseableMonitor();
 
-  private final ScheduledExecutorService executorService;
-  private Future<?> alarmFuture;
+  @GuardedBy("monitor.monitor")
+  private Optional<Future<?>> alarmFuture = Optional.empty();
 
   @GuardedBy("monitor.monitor")
-  private final RetryingConnection<ConnectedSubscriber> connection;
+  private final RetryingConnection<SubscribeRequest, ConnectedSubscriber> connection;
 
   @GuardedBy("monitor.monitor")
   private final NextOffsetTracker nextOffsetTracker = new NextOffsetTracker();
@@ -69,123 +67,69 @@ public class SubscriberImpl extends ProxyService
   private final FlowControlBatcher flowControlBatcher = new FlowControlBatcher();
 
   @GuardedBy("monitor.monitor")
-  private Optional<InFlightSeek> inFlightSeek = Optional.empty();
-
-  @GuardedBy("monitor.monitor")
-  private boolean internalSeekInFlight = false;
+  private SeekRequest initialLocation;
 
   @GuardedBy("monitor.monitor")
   private boolean shutdown = false;
-
-  private static class InFlightSeek {
-    final SeekRequest seekRequest;
-    final SettableApiFuture<Offset> seekFuture;
-
-    InFlightSeek(SeekRequest request, SettableApiFuture<Offset> future) {
-      seekRequest = request;
-      seekFuture = future;
-    }
-  }
 
   @VisibleForTesting
   SubscriberImpl(
       StreamFactory<SubscribeRequest, SubscribeResponse> streamFactory,
       ConnectedSubscriberFactory factory,
-      InitialSubscribeRequest initialRequest,
-      Consumer<ImmutableList<SequencedMessage>> messageConsumer)
+      AlarmFactory alarmFactory,
+      InitialSubscribeRequest baseInitialRequest,
+      SeekRequest initialLocation,
+      Consumer<List<SequencedMessage>> messageConsumer,
+      SubscriberResetHandler resetHandler)
       throws ApiException {
+    this.alarmFactory = alarmFactory;
     this.messageConsumer = messageConsumer;
+    this.resetHandler = resetHandler;
+    this.baseInitialRequest = baseInitialRequest;
+    this.initialLocation = initialLocation;
     this.connection =
-        new RetryingConnectionImpl<>(
-            streamFactory,
-            factory,
-            SubscribeRequest.newBuilder().setInitial(initialRequest).build(),
-            this);
-    this.executorService = Executors.newSingleThreadScheduledExecutor();
+        new RetryingConnectionImpl<>(streamFactory, factory, this, getInitialRequest());
     addServices(this.connection);
   }
 
   public SubscriberImpl(
       SubscriberServiceClient client,
-      InitialSubscribeRequest initialRequest,
-      Consumer<ImmutableList<SequencedMessage>> messageConsumer)
+      InitialSubscribeRequest baseInitialRequest,
+      SeekRequest initialLocation,
+      Consumer<List<SequencedMessage>> messageConsumer,
+      SubscriberResetHandler resetHandler)
       throws ApiException {
     this(
         stream -> client.subscribeCallable().splitCall(stream),
         new ConnectedSubscriberImpl.Factory(),
-        initialRequest,
-        messageConsumer);
+        AlarmFactory.create(FLOW_REQUESTS_FLUSH_INTERVAL),
+        baseInitialRequest,
+        initialLocation,
+        messageConsumer,
+        resetHandler);
     addServices(backgroundResourceAsApiService(client));
   }
 
   // ProxyService implementation.
   @Override
-  protected void handlePermanentError(CheckedApiException error) {
-    try (CloseableMonitor.Hold h = monitor.enter()) {
-      shutdown = true;
-      inFlightSeek.ifPresent(inFlight -> inFlight.seekFuture.setException(error));
-      inFlightSeek = Optional.empty();
-      onPermanentError(error);
-    }
-  }
-
-  @Override
   protected void start() {
     try (CloseableMonitor.Hold h = monitor.enter()) {
-      alarmFuture =
-          executorService.scheduleWithFixedDelay(
-              this::processBatchFlowRequest,
-              FLOW_REQUESTS_FLUSH_INTERVAL_MS,
-              FLOW_REQUESTS_FLUSH_INTERVAL_MS,
-              TimeUnit.MILLISECONDS);
+      alarmFuture = Optional.of(alarmFactory.newAlarm(this::processBatchFlowRequest));
     }
   }
 
   @Override
   protected void stop() {
-    alarmFuture.cancel(false /* mayInterruptIfRunning */);
-    executorService.shutdown();
     try (CloseableMonitor.Hold h = monitor.enter()) {
       shutdown = true;
-      inFlightSeek.ifPresent(
-          inFlight ->
-              inFlight.seekFuture.setException(
-                  new CheckedApiException("Client stopped while seek in flight.", Code.ABORTED)));
+      this.alarmFuture.ifPresent(future -> future.cancel(false));
+      this.alarmFuture = Optional.empty();
     }
   }
 
   @Override
-  public ApiFuture<Offset> seek(SeekRequest request) {
-    try (CloseableMonitor.Hold h =
-        monitor.enterWhenUninterruptibly(
-            new Monitor.Guard(monitor.monitor) {
-              @Override
-              public boolean isSatisfied() {
-                return !internalSeekInFlight || shutdown;
-              }
-            })) {
-      checkArgument(
-          Predicates.isValidSeekRequest(request), "Sent SeekRequest with no location set.");
-      checkState(!shutdown, "Seeked after the stream shut down.");
-      checkState(!inFlightSeek.isPresent(), "Seeked while seek is already in flight.");
-      SettableApiFuture<Offset> future = SettableApiFuture.create();
-      inFlightSeek = Optional.of(new InFlightSeek(request, future));
-      flowControlBatcher.onClientSeek();
-      connection.modifyConnection(
-          connectedSubscriber ->
-              connectedSubscriber.ifPresent(subscriber -> subscriber.seek(request)));
-      return future;
-    } catch (CheckedApiException e) {
-      onPermanentError(e);
-      return ApiFutures.immediateFailedFuture(e);
-    }
-  }
-
-  @Override
-  public boolean seekInFlight() {
-    try (CloseableMonitor.Hold h = monitor.enter()) {
-      return inFlightSeek.isPresent();
-    }
+  protected void handlePermanentError(CheckedApiException error) {
+    stop();
   }
 
   @Override
@@ -201,27 +145,48 @@ public class SubscriberImpl extends ProxyService
     }
   }
 
-  @Override
-  @SuppressWarnings("GuardedBy")
-  public void triggerReinitialize() {
+  private SubscribeRequest getInitialRequest() {
+    try (CloseableMonitor.Hold h = monitor.enter()) {
+      return SubscribeRequest.newBuilder()
+          .setInitial(
+              baseInitialRequest
+                  .toBuilder()
+                  .setInitialLocation(
+                      nextOffsetTracker.requestForRestart().orElse(initialLocation)))
+          .build();
+    }
+  }
+
+  public void reset() {
     try (CloseableMonitor.Hold h = monitor.enter()) {
       if (shutdown) return;
-      connection.reinitialize();
+      nextOffsetTracker.reset();
+      initialLocation =
+          SeekRequest.newBuilder().setNamedTarget(NamedTarget.COMMITTED_CURSOR).build();
+    }
+  }
+
+  @Override
+  @SuppressWarnings("GuardedBy")
+  public void triggerReinitialize(CheckedApiException streamError) {
+    if (ResetSignal.isResetSignal(streamError)) {
+      try {
+        if (resetHandler.handleReset()) {
+          reset();
+        }
+      } catch (CheckedApiException e) {
+        onPermanentError(e);
+        return;
+      }
+    }
+
+    try (CloseableMonitor.Hold h = monitor.enter()) {
+      if (shutdown) return;
+      connection.reinitialize(getInitialRequest());
       connection.modifyConnection(
           connectedSubscriber -> {
             checkArgument(monitor.monitor.isOccupiedByCurrentThread());
             checkArgument(connectedSubscriber.isPresent());
-            if (inFlightSeek.isPresent()) {
-              connectedSubscriber.get().seek(inFlightSeek.get().seekRequest);
-            } else {
-              nextOffsetTracker
-                  .requestForRestart()
-                  .ifPresent(
-                      request -> {
-                        internalSeekInFlight = true;
-                        connectedSubscriber.get().seek(request);
-                      });
-            }
             flowControlBatcher
                 .requestForRestart()
                 .ifPresent(request -> connectedSubscriber.get().allowFlow(request));
@@ -232,21 +197,7 @@ public class SubscriberImpl extends ProxyService
   }
 
   @Override
-  public void onClientResponse(Response value) throws CheckedApiException {
-    switch (value.getKind()) {
-      case MESSAGES:
-        onMessageResponse(value.messages());
-        return;
-      case SEEK_OFFSET:
-        onSeekResponse(value.seekOffset());
-        return;
-    }
-    throw new CheckedApiException(
-        "Invalid switch case: " + value.getKind(), Code.FAILED_PRECONDITION);
-  }
-
-  private void onMessageResponse(ImmutableList<SequencedMessage> messages)
-      throws CheckedApiException {
+  public void onClientResponse(List<SequencedMessage> messages) throws CheckedApiException {
     try (CloseableMonitor.Hold h = monitor.enter()) {
       if (shutdown) return;
       nextOffsetTracker.onMessages(messages);
@@ -255,22 +206,7 @@ public class SubscriberImpl extends ProxyService
     messageConsumer.accept(messages);
   }
 
-  private void onSeekResponse(Offset seekOffset) throws CheckedApiException {
-    try (CloseableMonitor.Hold h = monitor.enter()) {
-      if (shutdown) return;
-      if (internalSeekInFlight) {
-        internalSeekInFlight = false;
-        return;
-      }
-      checkState(inFlightSeek.isPresent(), "No in flight seek, but received a seek response.");
-      nextOffsetTracker.onClientSeek(seekOffset);
-      inFlightSeek.get().seekFuture.set(seekOffset);
-      inFlightSeek = Optional.empty();
-    }
-  }
-
-  @VisibleForTesting
-  void processBatchFlowRequest() {
+  private void processBatchFlowRequest() {
     try (CloseableMonitor.Hold h = monitor.enter()) {
       if (shutdown) return;
       connection.modifyConnection(

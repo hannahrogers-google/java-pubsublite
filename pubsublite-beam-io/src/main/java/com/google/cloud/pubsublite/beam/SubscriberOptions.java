@@ -22,6 +22,7 @@ import static com.google.cloud.pubsublite.internal.wire.ServiceClients.addDefaul
 
 import com.google.api.gax.rpc.ApiException;
 import com.google.auto.value.AutoValue;
+import com.google.cloud.pubsublite.Offset;
 import com.google.cloud.pubsublite.Partition;
 import com.google.cloud.pubsublite.SubscriptionPath;
 import com.google.cloud.pubsublite.cloudpubsub.FlowControlSettings;
@@ -34,14 +35,15 @@ import com.google.cloud.pubsublite.internal.wire.PubsubContext.Framework;
 import com.google.cloud.pubsublite.internal.wire.RoutingMetadata;
 import com.google.cloud.pubsublite.internal.wire.SubscriberBuilder;
 import com.google.cloud.pubsublite.internal.wire.SubscriberFactory;
+import com.google.cloud.pubsublite.proto.Cursor;
+import com.google.cloud.pubsublite.proto.SeekRequest;
 import com.google.cloud.pubsublite.v1.CursorServiceClient;
 import com.google.cloud.pubsublite.v1.CursorServiceSettings;
 import com.google.cloud.pubsublite.v1.SubscriberServiceClient;
 import com.google.cloud.pubsublite.v1.SubscriberServiceSettings;
-import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
-import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joda.time.Duration;
 
 @AutoValue
 public abstract class SubscriberOptions implements Serializable {
@@ -50,6 +52,8 @@ public abstract class SubscriberOptions implements Serializable {
   private static final Framework FRAMEWORK = Framework.of("BEAM");
 
   private static final long MEBIBYTE = 1L << 20;
+
+  private static final Duration MIN_BUNDLE_TIMEOUT = Duration.standardMinutes(1);
 
   public static final FlowControlSettings DEFAULT_FLOW_CONTROL =
       FlowControlSettings.builder()
@@ -65,9 +69,12 @@ public abstract class SubscriberOptions implements Serializable {
   public abstract FlowControlSettings flowControlSettings();
 
   /**
-   * A set of partitions. If empty, continuously poll the set of partitions using an admin client.
+   * The minimum wall time to pass before allowing bundle closure.
+   *
+   * <p>Setting this to too small of a value will result in increased compute costs and lower
+   * throughput per byte. Immediate timeouts (Duration.ZERO) may be useful for testing.
    */
-  public abstract Set<Partition> partitions();
+  public abstract Duration minBundleTimeout();
 
   /**
    * A factory to override subscriber creation entirely and delegate to another method. Primarily
@@ -95,7 +102,9 @@ public abstract class SubscriberOptions implements Serializable {
 
   public static Builder newBuilder() {
     Builder builder = new AutoValue_SubscriberOptions.Builder();
-    return builder.setPartitions(ImmutableSet.of()).setFlowControlSettings(DEFAULT_FLOW_CONTROL);
+    return builder
+        .setFlowControlSettings(DEFAULT_FLOW_CONTROL)
+        .setMinBundleTimeout(MIN_BUNDLE_TIMEOUT);
   }
 
   public abstract Builder toBuilder();
@@ -104,18 +113,19 @@ public abstract class SubscriberOptions implements Serializable {
       throws ApiException {
     try {
       SubscriberServiceSettings.Builder settingsBuilder = SubscriberServiceSettings.newBuilder();
-      addDefaultMetadata(
-          PubsubContext.of(FRAMEWORK),
-          RoutingMetadata.of(subscriptionPath(), partition),
-          settingsBuilder);
+      settingsBuilder =
+          addDefaultMetadata(
+              PubsubContext.of(FRAMEWORK),
+              RoutingMetadata.of(subscriptionPath(), partition),
+              settingsBuilder);
       return SubscriberServiceClient.create(
-          addDefaultSettings(subscriptionPath().location().region(), settingsBuilder));
+          addDefaultSettings(subscriptionPath().location().extractRegion(), settingsBuilder));
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
     }
   }
 
-  SubscriberFactory getSubscriberFactory(Partition partition) {
+  SubscriberFactory getSubscriberFactory(Partition partition, Offset initialOffset) {
     SubscriberFactory factory = subscriberFactory();
     if (factory != null) {
       return factory;
@@ -126,6 +136,10 @@ public abstract class SubscriberOptions implements Serializable {
             .setSubscriptionPath(subscriptionPath())
             .setPartition(partition)
             .setServiceClient(newSubscriberServiceClient(partition))
+            .setInitialLocation(
+                SeekRequest.newBuilder()
+                    .setCursor(Cursor.newBuilder().setOffset(initialOffset.value()))
+                    .build())
             .build();
   }
 
@@ -133,7 +147,7 @@ public abstract class SubscriberOptions implements Serializable {
     try {
       return CursorServiceClient.create(
           addDefaultSettings(
-              subscriptionPath().location().region(), CursorServiceSettings.newBuilder()));
+              subscriptionPath().location().extractRegion(), CursorServiceSettings.newBuilder()));
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
     }
@@ -172,7 +186,7 @@ public abstract class SubscriberOptions implements Serializable {
     return new InitialOffsetReaderImpl(
         CursorClient.create(
             CursorClientSettings.newBuilder()
-                .setRegion(subscriptionPath().location().region())
+                .setRegion(subscriptionPath().location().extractRegion())
                 .build()),
         subscriptionPath(),
         partition);
@@ -184,9 +198,9 @@ public abstract class SubscriberOptions implements Serializable {
     public abstract Builder setSubscriptionPath(SubscriptionPath path);
 
     // Optional parameters
-    public abstract Builder setPartitions(Set<Partition> partitions);
-
     public abstract Builder setFlowControlSettings(FlowControlSettings flowControlSettings);
+
+    public abstract Builder setMinBundleTimeout(Duration minBundleTimeout);
 
     // Used in unit tests
     abstract Builder setSubscriberFactory(SubscriberFactory subscriberFactory);

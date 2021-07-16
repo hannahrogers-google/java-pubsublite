@@ -22,14 +22,15 @@ import com.google.cloud.pubsublite.Partition;
 import com.google.cloud.pubsublite.SequencedMessage;
 import com.google.cloud.pubsublite.SubscriptionPath;
 import com.google.cloud.pubsublite.proto.InitialSubscribeRequest;
+import com.google.cloud.pubsublite.proto.SeekRequest;
 import com.google.cloud.pubsublite.v1.SubscriberServiceClient;
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.function.Consumer;
 
 @AutoValue
 public abstract class SubscriberBuilder {
   // Required parameters.
-  abstract Consumer<ImmutableList<SequencedMessage>> messageConsumer();
+  abstract Consumer<List<SequencedMessage>> messageConsumer();
 
   abstract SubscriptionPath subscriptionPath();
 
@@ -37,21 +38,31 @@ public abstract class SubscriberBuilder {
 
   abstract SubscriberServiceClient serviceClient();
 
+  abstract SeekRequest initialLocation();
+
+  // Optional parameters.
+  abstract SubscriberResetHandler resetHandler();
+
   public static Builder newBuilder() {
-    return new AutoValue_SubscriberBuilder.Builder();
+    return new AutoValue_SubscriberBuilder.Builder()
+        .setResetHandler(SubscriberResetHandler::unhandled);
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
     // Required parameters.
-    public abstract Builder setMessageConsumer(
-        Consumer<ImmutableList<SequencedMessage>> messageConsumer);
+    public abstract Builder setMessageConsumer(Consumer<List<SequencedMessage>> messageConsumer);
 
     public abstract Builder setSubscriptionPath(SubscriptionPath path);
 
     public abstract Builder setPartition(Partition partition);
 
     public abstract Builder setServiceClient(SubscriberServiceClient serviceClient);
+
+    public abstract Builder setInitialLocation(SeekRequest initialLocation);
+
+    // Optional parameters.
+    public abstract Builder setResetHandler(SubscriberResetHandler resetHandler);
 
     abstract SubscriberBuilder autoBuild();
 
@@ -64,9 +75,12 @@ public abstract class SubscriberBuilder {
               .setSubscription(autoBuilt.subscriptionPath().toString())
               .setPartition(autoBuilt.partition().value())
               .build();
-      return new ApiExceptionSubscriber(
-          new SubscriberImpl(
-              autoBuilt.serviceClient(), initialSubscribeRequest, autoBuilt.messageConsumer()));
+      return new SubscriberImpl(
+          autoBuilt.serviceClient(),
+          initialSubscribeRequest,
+          autoBuilt.initialLocation(),
+          autoBuilt.messageConsumer(),
+          autoBuilt.resetHandler());
     }
   }
 }

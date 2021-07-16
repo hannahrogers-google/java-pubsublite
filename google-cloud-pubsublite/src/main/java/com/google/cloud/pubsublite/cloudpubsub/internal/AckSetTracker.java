@@ -24,4 +24,8 @@ interface AckSetTracker extends ApiService {
   // Track the given message. Returns a Runnable to ack this message if the message is a valid one
   // to add to the ack set. Must be called with strictly increasing offset messages.
   Runnable track(SequencedMessage message) throws CheckedApiException;
+
+  // Discard all outstanding acks and wait for any pending commit offset to be acknowledged by the
+  // server. Throws an exception if the committer shut down due to a permanent error.
+  void waitUntilCommitted() throws CheckedApiException;
 }

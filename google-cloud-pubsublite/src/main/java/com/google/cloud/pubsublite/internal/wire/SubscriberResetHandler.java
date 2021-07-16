@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,16 @@
 
 package com.google.cloud.pubsublite.internal.wire;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import com.google.cloud.pubsublite.internal.CheckedApiException;
 
-import com.google.api.core.ApiService.Listener;
-import com.google.api.core.SettableApiFuture;
-import java.util.concurrent.Future;
+public interface SubscriberResetHandler {
+  // Called when the server instructs the subscriber to reset its state in order to handle an out of
+  // band seek. The implementation should return false if reset is not handled by this type of
+  // subscriber client. If an exception is thrown, the subscriber is shut down.
+  boolean handleReset() throws CheckedApiException;
 
-class RetryingConnectionHelpers {
-  static Future<Void> whenFailed(Listener mockListener) {
-    SettableApiFuture<Void> future = SettableApiFuture.create();
-    doAnswer(
-            args -> {
-              future.set(null);
-              return null;
-            })
-        .when(mockListener)
-        .failed(any(), any());
-    return future;
+  // Use SubscriberResetHandler::unhandled to disable reset handling.
+  static boolean unhandled() {
+    return false;
   }
 }

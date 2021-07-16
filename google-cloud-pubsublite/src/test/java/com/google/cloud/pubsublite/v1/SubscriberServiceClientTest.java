@@ -45,8 +45,8 @@ import org.junit.Test;
 public class SubscriberServiceClientTest {
   private static MockServiceHelper mockServiceHelper;
   private static MockSubscriberService mockSubscriberService;
-  private SubscriberServiceClient client;
   private LocalChannelProvider channelProvider;
+  private SubscriberServiceClient client;
 
   @BeforeClass
   public static void startStaticServer() {

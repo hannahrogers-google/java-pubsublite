@@ -583,6 +583,330 @@ public final class AdminServiceGrpc {
     return getDeleteSubscriptionMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.SeekSubscriptionRequest,
+          com.google.longrunning.Operation>
+      getSeekSubscriptionMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SeekSubscription",
+      requestType = com.google.cloud.pubsublite.proto.SeekSubscriptionRequest.class,
+      responseType = com.google.longrunning.Operation.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.SeekSubscriptionRequest,
+          com.google.longrunning.Operation>
+      getSeekSubscriptionMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.SeekSubscriptionRequest,
+            com.google.longrunning.Operation>
+        getSeekSubscriptionMethod;
+    if ((getSeekSubscriptionMethod = AdminServiceGrpc.getSeekSubscriptionMethod) == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getSeekSubscriptionMethod = AdminServiceGrpc.getSeekSubscriptionMethod) == null) {
+          AdminServiceGrpc.getSeekSubscriptionMethod =
+              getSeekSubscriptionMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.SeekSubscriptionRequest,
+                          com.google.longrunning.Operation>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SeekSubscription"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.SeekSubscriptionRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.longrunning.Operation.getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("SeekSubscription"))
+                      .build();
+        }
+      }
+    }
+    return getSeekSubscriptionMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.CreateReservationRequest,
+          com.google.cloud.pubsublite.proto.Reservation>
+      getCreateReservationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateReservation",
+      requestType = com.google.cloud.pubsublite.proto.CreateReservationRequest.class,
+      responseType = com.google.cloud.pubsublite.proto.Reservation.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.CreateReservationRequest,
+          com.google.cloud.pubsublite.proto.Reservation>
+      getCreateReservationMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.CreateReservationRequest,
+            com.google.cloud.pubsublite.proto.Reservation>
+        getCreateReservationMethod;
+    if ((getCreateReservationMethod = AdminServiceGrpc.getCreateReservationMethod) == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getCreateReservationMethod = AdminServiceGrpc.getCreateReservationMethod) == null) {
+          AdminServiceGrpc.getCreateReservationMethod =
+              getCreateReservationMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.CreateReservationRequest,
+                          com.google.cloud.pubsublite.proto.Reservation>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateReservation"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.CreateReservationRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.Reservation.getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("CreateReservation"))
+                      .build();
+        }
+      }
+    }
+    return getCreateReservationMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.GetReservationRequest,
+          com.google.cloud.pubsublite.proto.Reservation>
+      getGetReservationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetReservation",
+      requestType = com.google.cloud.pubsublite.proto.GetReservationRequest.class,
+      responseType = com.google.cloud.pubsublite.proto.Reservation.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.GetReservationRequest,
+          com.google.cloud.pubsublite.proto.Reservation>
+      getGetReservationMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.GetReservationRequest,
+            com.google.cloud.pubsublite.proto.Reservation>
+        getGetReservationMethod;
+    if ((getGetReservationMethod = AdminServiceGrpc.getGetReservationMethod) == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getGetReservationMethod = AdminServiceGrpc.getGetReservationMethod) == null) {
+          AdminServiceGrpc.getGetReservationMethod =
+              getGetReservationMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.GetReservationRequest,
+                          com.google.cloud.pubsublite.proto.Reservation>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetReservation"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.GetReservationRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.Reservation.getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("GetReservation"))
+                      .build();
+        }
+      }
+    }
+    return getGetReservationMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.ListReservationsRequest,
+          com.google.cloud.pubsublite.proto.ListReservationsResponse>
+      getListReservationsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListReservations",
+      requestType = com.google.cloud.pubsublite.proto.ListReservationsRequest.class,
+      responseType = com.google.cloud.pubsublite.proto.ListReservationsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.ListReservationsRequest,
+          com.google.cloud.pubsublite.proto.ListReservationsResponse>
+      getListReservationsMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.ListReservationsRequest,
+            com.google.cloud.pubsublite.proto.ListReservationsResponse>
+        getListReservationsMethod;
+    if ((getListReservationsMethod = AdminServiceGrpc.getListReservationsMethod) == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getListReservationsMethod = AdminServiceGrpc.getListReservationsMethod) == null) {
+          AdminServiceGrpc.getListReservationsMethod =
+              getListReservationsMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.ListReservationsRequest,
+                          com.google.cloud.pubsublite.proto.ListReservationsResponse>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListReservations"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.ListReservationsRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.ListReservationsResponse
+                                  .getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("ListReservations"))
+                      .build();
+        }
+      }
+    }
+    return getListReservationsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.UpdateReservationRequest,
+          com.google.cloud.pubsublite.proto.Reservation>
+      getUpdateReservationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateReservation",
+      requestType = com.google.cloud.pubsublite.proto.UpdateReservationRequest.class,
+      responseType = com.google.cloud.pubsublite.proto.Reservation.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.UpdateReservationRequest,
+          com.google.cloud.pubsublite.proto.Reservation>
+      getUpdateReservationMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.UpdateReservationRequest,
+            com.google.cloud.pubsublite.proto.Reservation>
+        getUpdateReservationMethod;
+    if ((getUpdateReservationMethod = AdminServiceGrpc.getUpdateReservationMethod) == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getUpdateReservationMethod = AdminServiceGrpc.getUpdateReservationMethod) == null) {
+          AdminServiceGrpc.getUpdateReservationMethod =
+              getUpdateReservationMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.UpdateReservationRequest,
+                          com.google.cloud.pubsublite.proto.Reservation>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateReservation"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.UpdateReservationRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.Reservation.getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("UpdateReservation"))
+                      .build();
+        }
+      }
+    }
+    return getUpdateReservationMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.DeleteReservationRequest, com.google.protobuf.Empty>
+      getDeleteReservationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteReservation",
+      requestType = com.google.cloud.pubsublite.proto.DeleteReservationRequest.class,
+      responseType = com.google.protobuf.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.DeleteReservationRequest, com.google.protobuf.Empty>
+      getDeleteReservationMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.DeleteReservationRequest, com.google.protobuf.Empty>
+        getDeleteReservationMethod;
+    if ((getDeleteReservationMethod = AdminServiceGrpc.getDeleteReservationMethod) == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getDeleteReservationMethod = AdminServiceGrpc.getDeleteReservationMethod) == null) {
+          AdminServiceGrpc.getDeleteReservationMethod =
+              getDeleteReservationMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.DeleteReservationRequest,
+                          com.google.protobuf.Empty>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteReservation"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.DeleteReservationRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.protobuf.Empty.getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("DeleteReservation"))
+                      .build();
+        }
+      }
+    }
+    return getDeleteReservationMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.ListReservationTopicsRequest,
+          com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+      getListReservationTopicsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListReservationTopics",
+      requestType = com.google.cloud.pubsublite.proto.ListReservationTopicsRequest.class,
+      responseType = com.google.cloud.pubsublite.proto.ListReservationTopicsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<
+          com.google.cloud.pubsublite.proto.ListReservationTopicsRequest,
+          com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+      getListReservationTopicsMethod() {
+    io.grpc.MethodDescriptor<
+            com.google.cloud.pubsublite.proto.ListReservationTopicsRequest,
+            com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+        getListReservationTopicsMethod;
+    if ((getListReservationTopicsMethod = AdminServiceGrpc.getListReservationTopicsMethod)
+        == null) {
+      synchronized (AdminServiceGrpc.class) {
+        if ((getListReservationTopicsMethod = AdminServiceGrpc.getListReservationTopicsMethod)
+            == null) {
+          AdminServiceGrpc.getListReservationTopicsMethod =
+              getListReservationTopicsMethod =
+                  io.grpc.MethodDescriptor
+                      .<com.google.cloud.pubsublite.proto.ListReservationTopicsRequest,
+                          com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+                          newBuilder()
+                      .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                      .setFullMethodName(
+                          generateFullMethodName(SERVICE_NAME, "ListReservationTopics"))
+                      .setSampledToLocalTracing(true)
+                      .setRequestMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.ListReservationTopicsRequest
+                                  .getDefaultInstance()))
+                      .setResponseMarshaller(
+                          io.grpc.protobuf.ProtoUtils.marshaller(
+                              com.google.cloud.pubsublite.proto.ListReservationTopicsResponse
+                                  .getDefaultInstance()))
+                      .setSchemaDescriptor(
+                          new AdminServiceMethodDescriptorSupplier("ListReservationTopics"))
+                      .build();
+        }
+      }
+    }
+    return getListReservationTopicsMethod;
+  }
+
   /** Creates a new async stub that supports all call types for the service */
   public static AdminServiceStub newStub(io.grpc.Channel channel) {
     io.grpc.stub.AbstractStub.StubFactory<AdminServiceStub> factory =
@@ -808,6 +1132,126 @@ public final class AdminServiceGrpc {
           getDeleteSubscriptionMethod(), responseObserver);
     }
 
+    /**
+     *
+     *
+     * <pre>
+     * Performs an out-of-band seek for a subscription to a specified target,
+     * which may be timestamps or named positions within the message backlog.
+     * Seek translates these targets to cursors for each partition and
+     * orchestrates subscribers to start consuming messages from these seek
+     * cursors.
+     * If an operation is returned, the seek has been registered and subscribers
+     * will eventually receive messages from the seek cursors (i.e. eventual
+     * consistency), as long as they are using a minimum supported client library
+     * version and not a system that tracks cursors independently of Pub/Sub Lite
+     * (e.g. Apache Beam, Dataflow, Spark). The seek operation will fail for
+     * unsupported clients.
+     * If clients would like to know when subscribers react to the seek (or not),
+     * they can poll the operation. The seek operation will succeed and complete
+     * once subscribers are ready to receive messages from the seek cursors for
+     * all partitions of the topic. This means that the seek operation will not
+     * complete until all subscribers come online.
+     * If the previous seek operation has not yet completed, it will be aborted
+     * and the new invocation of seek will supersede it.
+     * </pre>
+     */
+    public void seekSubscription(
+        com.google.cloud.pubsublite.proto.SeekSubscriptionRequest request,
+        io.grpc.stub.StreamObserver<com.google.longrunning.Operation> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getSeekSubscriptionMethod(), responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Creates a new reservation.
+     * </pre>
+     */
+    public void createReservation(
+        com.google.cloud.pubsublite.proto.CreateReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>
+            responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getCreateReservationMethod(), responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the reservation configuration.
+     * </pre>
+     */
+    public void getReservation(
+        com.google.cloud.pubsublite.proto.GetReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>
+            responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getGetReservationMethod(), responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the list of reservations for the given project.
+     * </pre>
+     */
+    public void listReservations(
+        com.google.cloud.pubsublite.proto.ListReservationsRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.ListReservationsResponse>
+            responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getListReservationsMethod(), responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Updates properties of the specified reservation.
+     * </pre>
+     */
+    public void updateReservation(
+        com.google.cloud.pubsublite.proto.UpdateReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>
+            responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getUpdateReservationMethod(), responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Deletes the specified reservation.
+     * </pre>
+     */
+    public void deleteReservation(
+        com.google.cloud.pubsublite.proto.DeleteReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getDeleteReservationMethod(), responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Lists the topics attached to the specified reservation.
+     * </pre>
+     */
+    public void listReservationTopics(
+        com.google.cloud.pubsublite.proto.ListReservationTopicsRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+            responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+          getListReservationTopicsMethod(), responseObserver);
+    }
+
     @java.lang.Override
     public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
@@ -890,6 +1334,53 @@ public final class AdminServiceGrpc {
                   new MethodHandlers<
                       com.google.cloud.pubsublite.proto.DeleteSubscriptionRequest,
                       com.google.protobuf.Empty>(this, METHODID_DELETE_SUBSCRIPTION)))
+          .addMethod(
+              getSeekSubscriptionMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.SeekSubscriptionRequest,
+                      com.google.longrunning.Operation>(this, METHODID_SEEK_SUBSCRIPTION)))
+          .addMethod(
+              getCreateReservationMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.CreateReservationRequest,
+                      com.google.cloud.pubsublite.proto.Reservation>(
+                      this, METHODID_CREATE_RESERVATION)))
+          .addMethod(
+              getGetReservationMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.GetReservationRequest,
+                      com.google.cloud.pubsublite.proto.Reservation>(
+                      this, METHODID_GET_RESERVATION)))
+          .addMethod(
+              getListReservationsMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.ListReservationsRequest,
+                      com.google.cloud.pubsublite.proto.ListReservationsResponse>(
+                      this, METHODID_LIST_RESERVATIONS)))
+          .addMethod(
+              getUpdateReservationMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.UpdateReservationRequest,
+                      com.google.cloud.pubsublite.proto.Reservation>(
+                      this, METHODID_UPDATE_RESERVATION)))
+          .addMethod(
+              getDeleteReservationMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.DeleteReservationRequest,
+                      com.google.protobuf.Empty>(this, METHODID_DELETE_RESERVATION)))
+          .addMethod(
+              getListReservationTopicsMethod(),
+              io.grpc.stub.ServerCalls.asyncUnaryCall(
+                  new MethodHandlers<
+                      com.google.cloud.pubsublite.proto.ListReservationTopicsRequest,
+                      com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>(
+                      this, METHODID_LIST_RESERVATION_TOPICS)))
           .build();
     }
   }
@@ -1108,6 +1599,140 @@ public final class AdminServiceGrpc {
           request,
           responseObserver);
     }
+
+    /**
+     *
+     *
+     * <pre>
+     * Performs an out-of-band seek for a subscription to a specified target,
+     * which may be timestamps or named positions within the message backlog.
+     * Seek translates these targets to cursors for each partition and
+     * orchestrates subscribers to start consuming messages from these seek
+     * cursors.
+     * If an operation is returned, the seek has been registered and subscribers
+     * will eventually receive messages from the seek cursors (i.e. eventual
+     * consistency), as long as they are using a minimum supported client library
+     * version and not a system that tracks cursors independently of Pub/Sub Lite
+     * (e.g. Apache Beam, Dataflow, Spark). The seek operation will fail for
+     * unsupported clients.
+     * If clients would like to know when subscribers react to the seek (or not),
+     * they can poll the operation. The seek operation will succeed and complete
+     * once subscribers are ready to receive messages from the seek cursors for
+     * all partitions of the topic. This means that the seek operation will not
+     * complete until all subscribers come online.
+     * If the previous seek operation has not yet completed, it will be aborted
+     * and the new invocation of seek will supersede it.
+     * </pre>
+     */
+    public void seekSubscription(
+        com.google.cloud.pubsublite.proto.SeekSubscriptionRequest request,
+        io.grpc.stub.StreamObserver<com.google.longrunning.Operation> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSeekSubscriptionMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Creates a new reservation.
+     * </pre>
+     */
+    public void createReservation(
+        com.google.cloud.pubsublite.proto.CreateReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>
+            responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateReservationMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the reservation configuration.
+     * </pre>
+     */
+    public void getReservation(
+        com.google.cloud.pubsublite.proto.GetReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>
+            responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetReservationMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the list of reservations for the given project.
+     * </pre>
+     */
+    public void listReservations(
+        com.google.cloud.pubsublite.proto.ListReservationsRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.ListReservationsResponse>
+            responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListReservationsMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Updates properties of the specified reservation.
+     * </pre>
+     */
+    public void updateReservation(
+        com.google.cloud.pubsublite.proto.UpdateReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>
+            responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateReservationMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Deletes the specified reservation.
+     * </pre>
+     */
+    public void deleteReservation(
+        com.google.cloud.pubsublite.proto.DeleteReservationRequest request,
+        io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteReservationMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Lists the topics attached to the specified reservation.
+     * </pre>
+     */
+    public void listReservationTopics(
+        com.google.cloud.pubsublite.proto.ListReservationTopicsRequest request,
+        io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+            responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListReservationTopicsMethod(), getCallOptions()),
+          request,
+          responseObserver);
+    }
   }
 
   /**
@@ -1284,6 +1909,114 @@ public final class AdminServiceGrpc {
         com.google.cloud.pubsublite.proto.DeleteSubscriptionRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getDeleteSubscriptionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Performs an out-of-band seek for a subscription to a specified target,
+     * which may be timestamps or named positions within the message backlog.
+     * Seek translates these targets to cursors for each partition and
+     * orchestrates subscribers to start consuming messages from these seek
+     * cursors.
+     * If an operation is returned, the seek has been registered and subscribers
+     * will eventually receive messages from the seek cursors (i.e. eventual
+     * consistency), as long as they are using a minimum supported client library
+     * version and not a system that tracks cursors independently of Pub/Sub Lite
+     * (e.g. Apache Beam, Dataflow, Spark). The seek operation will fail for
+     * unsupported clients.
+     * If clients would like to know when subscribers react to the seek (or not),
+     * they can poll the operation. The seek operation will succeed and complete
+     * once subscribers are ready to receive messages from the seek cursors for
+     * all partitions of the topic. This means that the seek operation will not
+     * complete until all subscribers come online.
+     * If the previous seek operation has not yet completed, it will be aborted
+     * and the new invocation of seek will supersede it.
+     * </pre>
+     */
+    public com.google.longrunning.Operation seekSubscription(
+        com.google.cloud.pubsublite.proto.SeekSubscriptionRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSeekSubscriptionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Creates a new reservation.
+     * </pre>
+     */
+    public com.google.cloud.pubsublite.proto.Reservation createReservation(
+        com.google.cloud.pubsublite.proto.CreateReservationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateReservationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the reservation configuration.
+     * </pre>
+     */
+    public com.google.cloud.pubsublite.proto.Reservation getReservation(
+        com.google.cloud.pubsublite.proto.GetReservationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetReservationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the list of reservations for the given project.
+     * </pre>
+     */
+    public com.google.cloud.pubsublite.proto.ListReservationsResponse listReservations(
+        com.google.cloud.pubsublite.proto.ListReservationsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListReservationsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Updates properties of the specified reservation.
+     * </pre>
+     */
+    public com.google.cloud.pubsublite.proto.Reservation updateReservation(
+        com.google.cloud.pubsublite.proto.UpdateReservationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateReservationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Deletes the specified reservation.
+     * </pre>
+     */
+    public com.google.protobuf.Empty deleteReservation(
+        com.google.cloud.pubsublite.proto.DeleteReservationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteReservationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Lists the topics attached to the specified reservation.
+     * </pre>
+     */
+    public com.google.cloud.pubsublite.proto.ListReservationTopicsResponse listReservationTopics(
+        com.google.cloud.pubsublite.proto.ListReservationTopicsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListReservationTopicsMethod(), getCallOptions(), request);
     }
   }
 
@@ -1473,6 +2206,120 @@ public final class AdminServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getDeleteSubscriptionMethod(), getCallOptions()), request);
     }
+
+    /**
+     *
+     *
+     * <pre>
+     * Performs an out-of-band seek for a subscription to a specified target,
+     * which may be timestamps or named positions within the message backlog.
+     * Seek translates these targets to cursors for each partition and
+     * orchestrates subscribers to start consuming messages from these seek
+     * cursors.
+     * If an operation is returned, the seek has been registered and subscribers
+     * will eventually receive messages from the seek cursors (i.e. eventual
+     * consistency), as long as they are using a minimum supported client library
+     * version and not a system that tracks cursors independently of Pub/Sub Lite
+     * (e.g. Apache Beam, Dataflow, Spark). The seek operation will fail for
+     * unsupported clients.
+     * If clients would like to know when subscribers react to the seek (or not),
+     * they can poll the operation. The seek operation will succeed and complete
+     * once subscribers are ready to receive messages from the seek cursors for
+     * all partitions of the topic. This means that the seek operation will not
+     * complete until all subscribers come online.
+     * If the previous seek operation has not yet completed, it will be aborted
+     * and the new invocation of seek will supersede it.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.google.longrunning.Operation>
+        seekSubscription(com.google.cloud.pubsublite.proto.SeekSubscriptionRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSeekSubscriptionMethod(), getCallOptions()), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Creates a new reservation.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<
+            com.google.cloud.pubsublite.proto.Reservation>
+        createReservation(com.google.cloud.pubsublite.proto.CreateReservationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateReservationMethod(), getCallOptions()), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the reservation configuration.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<
+            com.google.cloud.pubsublite.proto.Reservation>
+        getReservation(com.google.cloud.pubsublite.proto.GetReservationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetReservationMethod(), getCallOptions()), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Returns the list of reservations for the given project.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<
+            com.google.cloud.pubsublite.proto.ListReservationsResponse>
+        listReservations(com.google.cloud.pubsublite.proto.ListReservationsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListReservationsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Updates properties of the specified reservation.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<
+            com.google.cloud.pubsublite.proto.Reservation>
+        updateReservation(com.google.cloud.pubsublite.proto.UpdateReservationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateReservationMethod(), getCallOptions()), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Deletes the specified reservation.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.google.protobuf.Empty>
+        deleteReservation(com.google.cloud.pubsublite.proto.DeleteReservationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteReservationMethod(), getCallOptions()), request);
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     * Lists the topics attached to the specified reservation.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<
+            com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>
+        listReservationTopics(
+            com.google.cloud.pubsublite.proto.ListReservationTopicsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListReservationTopicsMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_CREATE_TOPIC = 0;
@@ -1487,6 +2334,13 @@ public final class AdminServiceGrpc {
   private static final int METHODID_LIST_SUBSCRIPTIONS = 9;
   private static final int METHODID_UPDATE_SUBSCRIPTION = 10;
   private static final int METHODID_DELETE_SUBSCRIPTION = 11;
+  private static final int METHODID_SEEK_SUBSCRIPTION = 12;
+  private static final int METHODID_CREATE_RESERVATION = 13;
+  private static final int METHODID_GET_RESERVATION = 14;
+  private static final int METHODID_LIST_RESERVATIONS = 15;
+  private static final int METHODID_UPDATE_RESERVATION = 16;
+  private static final int METHODID_DELETE_RESERVATION = 17;
+  private static final int METHODID_LIST_RESERVATION_TOPICS = 18;
 
   private static final class MethodHandlers<Req, Resp>
       implements io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1577,6 +2431,48 @@ public final class AdminServiceGrpc {
               (com.google.cloud.pubsublite.proto.DeleteSubscriptionRequest) request,
               (io.grpc.stub.StreamObserver<com.google.protobuf.Empty>) responseObserver);
           break;
+        case METHODID_SEEK_SUBSCRIPTION:
+          serviceImpl.seekSubscription(
+              (com.google.cloud.pubsublite.proto.SeekSubscriptionRequest) request,
+              (io.grpc.stub.StreamObserver<com.google.longrunning.Operation>) responseObserver);
+          break;
+        case METHODID_CREATE_RESERVATION:
+          serviceImpl.createReservation(
+              (com.google.cloud.pubsublite.proto.CreateReservationRequest) request,
+              (io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>)
+                  responseObserver);
+          break;
+        case METHODID_GET_RESERVATION:
+          serviceImpl.getReservation(
+              (com.google.cloud.pubsublite.proto.GetReservationRequest) request,
+              (io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>)
+                  responseObserver);
+          break;
+        case METHODID_LIST_RESERVATIONS:
+          serviceImpl.listReservations(
+              (com.google.cloud.pubsublite.proto.ListReservationsRequest) request,
+              (io.grpc.stub.StreamObserver<
+                      com.google.cloud.pubsublite.proto.ListReservationsResponse>)
+                  responseObserver);
+          break;
+        case METHODID_UPDATE_RESERVATION:
+          serviceImpl.updateReservation(
+              (com.google.cloud.pubsublite.proto.UpdateReservationRequest) request,
+              (io.grpc.stub.StreamObserver<com.google.cloud.pubsublite.proto.Reservation>)
+                  responseObserver);
+          break;
+        case METHODID_DELETE_RESERVATION:
+          serviceImpl.deleteReservation(
+              (com.google.cloud.pubsublite.proto.DeleteReservationRequest) request,
+              (io.grpc.stub.StreamObserver<com.google.protobuf.Empty>) responseObserver);
+          break;
+        case METHODID_LIST_RESERVATION_TOPICS:
+          serviceImpl.listReservationTopics(
+              (com.google.cloud.pubsublite.proto.ListReservationTopicsRequest) request,
+              (io.grpc.stub.StreamObserver<
+                      com.google.cloud.pubsublite.proto.ListReservationTopicsResponse>)
+                  responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -1653,6 +2549,13 @@ public final class AdminServiceGrpc {
                       .addMethod(getListSubscriptionsMethod())
                       .addMethod(getUpdateSubscriptionMethod())
                       .addMethod(getDeleteSubscriptionMethod())
+                      .addMethod(getSeekSubscriptionMethod())
+                      .addMethod(getCreateReservationMethod())
+                      .addMethod(getGetReservationMethod())
+                      .addMethod(getListReservationsMethod())
+                      .addMethod(getUpdateReservationMethod())
+                      .addMethod(getDeleteReservationMethod())
+                      .addMethod(getListReservationTopicsMethod())
                       .build();
         }
       }

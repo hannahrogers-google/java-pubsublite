@@ -4,14 +4,14 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/java-pubsublite.git",
-        "sha": "4fd40789aeb8420f858bd6bdfdcf987dce9f9549"
+        "sha": "542c2c71df4aadeece5fc426fb93fffa661b0a32"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "8c5628b86cfa8386de7b8fc1675e6b528b552d57"
+        "sha": "39652e3948f455fd0b77535a0145eeec561a3706"
       }
     }
   ]

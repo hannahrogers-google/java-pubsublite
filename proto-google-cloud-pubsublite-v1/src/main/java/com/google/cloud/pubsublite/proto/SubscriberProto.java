@@ -85,67 +85,73 @@ public final class SubscriberProto {
   static {
     java.lang.String[] descriptorData = {
       "\n+google/cloud/pubsublite/v1/subscriber."
-          + "proto\022\032google.cloud.pubsublite.v1\032\'googl"
-          + "e/cloud/pubsublite/v1/common.proto\032\027goog"
-          + "le/api/client.proto\"B\n\027InitialSubscribeR"
-          + "equest\022\024\n\014subscription\030\001 \001(\t\022\021\n\tpartitio"
-          + "n\030\002 \001(\003\"N\n\030InitialSubscribeResponse\0222\n\006c"
-          + "ursor\030\001 \001(\0132\".google.cloud.pubsublite.v1"
-          + ".Cursor\"\347\001\n\013SeekRequest\022K\n\014named_target\030"
-          + "\001 \001(\01623.google.cloud.pubsublite.v1.SeekR"
-          + "equest.NamedTargetH\000\0224\n\006cursor\030\002 \001(\0132\".g"
-          + "oogle.cloud.pubsublite.v1.CursorH\000\"K\n\013Na"
-          + "medTarget\022\034\n\030NAMED_TARGET_UNSPECIFIED\020\000\022"
-          + "\010\n\004HEAD\020\001\022\024\n\020COMMITTED_CURSOR\020\002B\010\n\006targe"
-          + "t\"B\n\014SeekResponse\0222\n\006cursor\030\001 \001(\0132\".goog"
-          + "le.cloud.pubsublite.v1.Cursor\"E\n\022FlowCon"
-          + "trolRequest\022\030\n\020allowed_messages\030\001 \001(\003\022\025\n"
-          + "\rallowed_bytes\030\002 \001(\003\"\346\001\n\020SubscribeReques"
-          + "t\022F\n\007initial\030\001 \001(\01323.google.cloud.pubsub"
-          + "lite.v1.InitialSubscribeRequestH\000\0227\n\004see"
-          + "k\030\002 \001(\0132\'.google.cloud.pubsublite.v1.See"
-          + "kRequestH\000\022F\n\014flow_control\030\003 \001(\0132..googl"
-          + "e.cloud.pubsublite.v1.FlowControlRequest"
-          + "H\000B\t\n\007request\"Q\n\017MessageResponse\022>\n\010mess"
-          + "ages\030\001 \003(\0132,.google.cloud.pubsublite.v1."
-          + "SequencedMessage\"\343\001\n\021SubscribeResponse\022G"
-          + "\n\007initial\030\001 \001(\01324.google.cloud.pubsublit"
-          + "e.v1.InitialSubscribeResponseH\000\0228\n\004seek\030"
-          + "\002 \001(\0132(.google.cloud.pubsublite.v1.SeekR"
-          + "esponseH\000\022?\n\010messages\030\003 \001(\0132+.google.clo"
-          + "ud.pubsublite.v1.MessageResponseH\000B\n\n\010re"
-          + "sponse\"L\n!InitialPartitionAssignmentRequ"
-          + "est\022\024\n\014subscription\030\001 \001(\t\022\021\n\tclient_id\030\002"
-          + " \001(\014\")\n\023PartitionAssignment\022\022\n\npartition"
-          + "s\030\001 \003(\003\"\030\n\026PartitionAssignmentAck\"\274\001\n\032Pa"
-          + "rtitionAssignmentRequest\022P\n\007initial\030\001 \001("
-          + "\0132=.google.cloud.pubsublite.v1.InitialPa"
-          + "rtitionAssignmentRequestH\000\022A\n\003ack\030\002 \001(\0132"
-          + "2.google.cloud.pubsublite.v1.PartitionAs"
-          + "signmentAckH\000B\t\n\007request2\322\001\n\021SubscriberS"
-          + "ervice\022n\n\tSubscribe\022,.google.cloud.pubsu"
-          + "blite.v1.SubscribeRequest\032-.google.cloud"
-          + ".pubsublite.v1.SubscribeResponse\"\000(\0010\001\032M"
-          + "\312A\031pubsublite.googleapis.com\322A.https://w"
-          + "ww.googleapis.com/auth/cloud-platform2\357\001"
-          + "\n\032PartitionAssignmentService\022\201\001\n\020AssignP"
-          + "artitions\0226.google.cloud.pubsublite.v1.P"
-          + "artitionAssignmentRequest\032/.google.cloud"
-          + ".pubsublite.v1.PartitionAssignment\"\000(\0010\001"
-          + "\032M\312A\031pubsublite.googleapis.com\322A.https:/"
-          + "/www.googleapis.com/auth/cloud-platformB"
-          + "\331\001\n!com.google.cloud.pubsublite.protoB\017S"
-          + "ubscriberProtoP\001ZDgoogle.golang.org/genp"
-          + "roto/googleapis/cloud/pubsublite/v1;pubs"
-          + "ublite\370\001\001\252\002\032Google.Cloud.PubSubLite.V1\312\002"
-          + "\032Google\\Cloud\\PubSubLite\\V1\352\002\035Google::Cl"
-          + "oud::PubSubLite::V1b\006proto3"
+          + "proto\022\032google.cloud.pubsublite.v1\032\037googl"
+          + "e/api/field_behavior.proto\032\'google/cloud"
+          + "/pubsublite/v1/common.proto\032\034google/api/"
+          + "annotations.proto\032\027google/api/client.pro"
+          + "to\"\212\001\n\027InitialSubscribeRequest\022\024\n\014subscr"
+          + "iption\030\001 \001(\t\022\021\n\tpartition\030\002 \001(\003\022F\n\020initi"
+          + "al_location\030\004 \001(\0132\'.google.cloud.pubsubl"
+          + "ite.v1.SeekRequestB\003\340A\001\"N\n\030InitialSubscr"
+          + "ibeResponse\0222\n\006cursor\030\001 \001(\0132\".google.clo"
+          + "ud.pubsublite.v1.Cursor\"\347\001\n\013SeekRequest\022"
+          + "K\n\014named_target\030\001 \001(\01623.google.cloud.pub"
+          + "sublite.v1.SeekRequest.NamedTargetH\000\0224\n\006"
+          + "cursor\030\002 \001(\0132\".google.cloud.pubsublite.v"
+          + "1.CursorH\000\"K\n\013NamedTarget\022\034\n\030NAMED_TARGE"
+          + "T_UNSPECIFIED\020\000\022\010\n\004HEAD\020\001\022\024\n\020COMMITTED_C"
+          + "URSOR\020\002B\010\n\006target\"B\n\014SeekResponse\0222\n\006cur"
+          + "sor\030\001 \001(\0132\".google.cloud.pubsublite.v1.C"
+          + "ursor\"E\n\022FlowControlRequest\022\030\n\020allowed_m"
+          + "essages\030\001 \001(\003\022\025\n\rallowed_bytes\030\002 \001(\003\"\346\001\n"
+          + "\020SubscribeRequest\022F\n\007initial\030\001 \001(\01323.goo"
+          + "gle.cloud.pubsublite.v1.InitialSubscribe"
+          + "RequestH\000\0227\n\004seek\030\002 \001(\0132\'.google.cloud.p"
+          + "ubsublite.v1.SeekRequestH\000\022F\n\014flow_contr"
+          + "ol\030\003 \001(\0132..google.cloud.pubsublite.v1.Fl"
+          + "owControlRequestH\000B\t\n\007request\"Q\n\017Message"
+          + "Response\022>\n\010messages\030\001 \003(\0132,.google.clou"
+          + "d.pubsublite.v1.SequencedMessage\"\343\001\n\021Sub"
+          + "scribeResponse\022G\n\007initial\030\001 \001(\01324.google"
+          + ".cloud.pubsublite.v1.InitialSubscribeRes"
+          + "ponseH\000\0228\n\004seek\030\002 \001(\0132(.google.cloud.pub"
+          + "sublite.v1.SeekResponseH\000\022?\n\010messages\030\003 "
+          + "\001(\0132+.google.cloud.pubsublite.v1.Message"
+          + "ResponseH\000B\n\n\010response\"L\n!InitialPartiti"
+          + "onAssignmentRequest\022\024\n\014subscription\030\001 \001("
+          + "\t\022\021\n\tclient_id\030\002 \001(\014\")\n\023PartitionAssignm"
+          + "ent\022\022\n\npartitions\030\001 \003(\003\"\030\n\026PartitionAssi"
+          + "gnmentAck\"\274\001\n\032PartitionAssignmentRequest"
+          + "\022P\n\007initial\030\001 \001(\0132=.google.cloud.pubsubl"
+          + "ite.v1.InitialPartitionAssignmentRequest"
+          + "H\000\022A\n\003ack\030\002 \001(\01322.google.cloud.pubsublit"
+          + "e.v1.PartitionAssignmentAckH\000B\t\n\007request"
+          + "2\322\001\n\021SubscriberService\022n\n\tSubscribe\022,.go"
+          + "ogle.cloud.pubsublite.v1.SubscribeReques"
+          + "t\032-.google.cloud.pubsublite.v1.Subscribe"
+          + "Response\"\000(\0010\001\032M\312A\031pubsublite.googleapis"
+          + ".com\322A.https://www.googleapis.com/auth/c"
+          + "loud-platform2\357\001\n\032PartitionAssignmentSer"
+          + "vice\022\201\001\n\020AssignPartitions\0226.google.cloud"
+          + ".pubsublite.v1.PartitionAssignmentReques"
+          + "t\032/.google.cloud.pubsublite.v1.Partition"
+          + "Assignment\"\000(\0010\001\032M\312A\031pubsublite.googleap"
+          + "is.com\322A.https://www.googleapis.com/auth"
+          + "/cloud-platformB\331\001\n!com.google.cloud.pub"
+          + "sublite.protoB\017SubscriberProtoP\001ZDgoogle"
+          + ".golang.org/genproto/googleapis/cloud/pu"
+          + "bsublite/v1;pubsublite\370\001\001\252\002\032Google.Cloud"
+          + ".PubSubLite.V1\312\002\032Google\\Cloud\\PubSubLite"
+          + "\\V1\352\002\035Google::Cloud::PubSubLite::V1b\006pro"
+          + "to3"
     };
     descriptor =
         com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
             descriptorData,
             new com.google.protobuf.Descriptors.FileDescriptor[] {
+              com.google.api.FieldBehaviorProto.getDescriptor(),
               com.google.cloud.pubsublite.proto.CommonProto.getDescriptor(),
+              com.google.api.AnnotationsProto.getDescriptor(),
               com.google.api.ClientProto.getDescriptor(),
             });
     internal_static_google_cloud_pubsublite_v1_InitialSubscribeRequest_descriptor =
@@ -154,7 +160,7 @@ public final class SubscriberProto {
         new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
             internal_static_google_cloud_pubsublite_v1_InitialSubscribeRequest_descriptor,
             new java.lang.String[] {
-              "Subscription", "Partition",
+              "Subscription", "Partition", "InitialLocation",
             });
     internal_static_google_cloud_pubsublite_v1_InitialSubscribeResponse_descriptor =
         getDescriptor().getMessageTypes().get(1);
@@ -245,10 +251,13 @@ public final class SubscriberProto {
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.google.api.ClientProto.defaultHost);
+    registry.add(com.google.api.FieldBehaviorProto.fieldBehavior);
     registry.add(com.google.api.ClientProto.oauthScopes);
     com.google.protobuf.Descriptors.FileDescriptor.internalUpdateFileDescriptor(
         descriptor, registry);
+    com.google.api.FieldBehaviorProto.getDescriptor();
     com.google.cloud.pubsublite.proto.CommonProto.getDescriptor();
+    com.google.api.AnnotationsProto.getDescriptor();
     com.google.api.ClientProto.getDescriptor();
   }
 

@@ -3,13 +3,13 @@
   <parent>
     <groupId>com.google.cloud</groupId>
     <artifactId>google-cloud-pubsublite-parent</artifactId>
-    <version>0.11.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
+    <version>0.16.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.google.cloud</groupId>
   <artifactId>google-cloud-pubsublite</artifactId>
-  <version>0.11.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
+  <version>0.16.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
   <packaging>jar</packaging>
   <name>Google Cloud Pub/Sub Lite</name>
   <url>https://github.com/googleapis/java-pubsublite</url>
@@ -46,12 +46,12 @@
     <dependency>
       <groupId>com.google.api.grpc</groupId>
       <artifactId>proto-google-cloud-pubsublite-v1</artifactId>
-      <version>0.11.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
+      <version>0.16.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
     </dependency>
     <dependency>
       <groupId>com.google.api.grpc</groupId>
       <artifactId>grpc-google-cloud-pubsublite-v1</artifactId>
-      <version>0.11.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
+      <version>0.16.2-SNAPSHOT</version><!-- {x-version-update:google-cloud-pubsublite:current} -->
     </dependency>
     <dependency>
       <groupId>com.google.flogger</groupId>
@@ -98,7 +98,7 @@
     <dependency>
       <groupId>com.google.flogger</groupId>
       <artifactId>flogger-system-backend</artifactId>
-      <version>0.5.1</version>
+      <version>0.6</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -161,18 +161,6 @@
     </pluginManagement>
     <plugins>
       <plugin>
-        <groupId>com.coveo</groupId>
-        <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.9</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>format</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.0.0-M3</version>
@@ -194,10 +182,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>flatten-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

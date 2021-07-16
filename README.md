@@ -20,24 +20,24 @@ If you are using Maven, add this to your pom.xml file:
 <dependency>
   <groupId>com.google.cloud</groupId>
   <artifactId>google-cloud-pubsublite</artifactId>
-  <version>0.11.1</version>
+  <version>0.16.1</version>
 </dependency>
 <dependency>
   <groupId>com.google.cloud</groupId>
   <artifactId>google-cloud-pubsub</artifactId>
-  <version>1.111.4</version>
+  <version>1.113.5</version>
 </dependency>
 
 ```
 
 If you are using Gradle without BOM, add this to your dependencies
 ```Groovy
-compile 'com.google.cloud:google-cloud-pubsublite:0.11.1'
+compile 'com.google.cloud:google-cloud-pubsublite:0.16.1'
 ```
 
 If you are using SBT, add this to your dependencies
 ```Scala
-libraryDependencies += "com.google.cloud" % "google-cloud-pubsublite" % "0.11.1"
+libraryDependencies += "com.google.cloud" % "google-cloud-pubsublite" % "0.16.1"
 ```
 
 ## Authentication
@@ -367,6 +367,8 @@ has instructions for running the samples.
 | Subscriber Example | [source code](https://github.com/googleapis/java-pubsublite/blob/master/samples/snippets/src/main/java/pubsublite/SubscriberExample.java) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/java-pubsublite&page=editor&open_in_editor=samples/snippets/src/main/java/pubsublite/SubscriberExample.java) |
 | Update Subscription Example | [source code](https://github.com/googleapis/java-pubsublite/blob/master/samples/snippets/src/main/java/pubsublite/UpdateSubscriptionExample.java) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/java-pubsublite&page=editor&open_in_editor=samples/snippets/src/main/java/pubsublite/UpdateSubscriptionExample.java) |
 | Update Topic Example | [source code](https://github.com/googleapis/java-pubsublite/blob/master/samples/snippets/src/main/java/pubsublite/UpdateTopicExample.java) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/java-pubsublite&page=editor&open_in_editor=samples/snippets/src/main/java/pubsublite/UpdateTopicExample.java) |
+| Read Messages Example | [source code](https://github.com/googleapis/java-pubsublite/blob/master/samples/snippets/src/main/java/pubsublite/beam/ReadMessagesExample.java) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/java-pubsublite&page=editor&open_in_editor=samples/snippets/src/main/java/pubsublite/beam/ReadMessagesExample.java) |
+| Write Messages Example | [source code](https://github.com/googleapis/java-pubsublite/blob/master/samples/snippets/src/main/java/pubsublite/beam/WriteMessagesExample.java) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/java-pubsublite&page=editor&open_in_editor=samples/snippets/src/main/java/pubsublite/beam/WriteMessagesExample.java) |
 
 
 

@@ -59,7 +59,6 @@ public abstract class PublisherSettings {
           .setRequestByteThreshold(Constants.MAX_PUBLISH_BATCH_BYTES)
           .setDelayThreshold(Duration.ofMillis(50))
           .build();
-  private static final Framework FRAMEWORK = Framework.of("CLOUD_PUBSUB_SHIM");
 
   // Required parameters.
 
@@ -80,6 +79,11 @@ public abstract class PublisherSettings {
   abstract CredentialsProvider credentialsProvider();
 
   /**
+   * A Framework tag for internal metrics. Please set this if integrating with a public framework!
+   */
+  abstract Framework framework();
+
+  /**
    * A supplier for new PublisherServiceClients. Should return a new client each time. If present,
    * ignores CredentialsProvider.
    */
@@ -94,6 +98,7 @@ public abstract class PublisherSettings {
   /** Get a new builder for a PublisherSettings. */
   public static Builder newBuilder() {
     return new AutoValue_PublisherSettings.Builder()
+        .setFramework(Framework.of("CLOUD_PUBSUB_SHIM"))
         .setCredentialsProvider(
             PublisherServiceSettings.defaultCredentialsProviderBuilder().build())
         .setUnderlyingBuilder(SinglePartitionPublisherBuilder.newBuilder());
@@ -121,6 +126,11 @@ public abstract class PublisherSettings {
     public abstract Builder setCredentialsProvider(CredentialsProvider credentialsProvider);
 
     /**
+     * A Framework tag for internal metrics. Please set this if integrating with a public framework!
+     */
+    public abstract Builder setFramework(Framework framework);
+
+    /**
      * A supplier for new PublisherServiceClients. Should return a new client each time. If present,
      * ignores CredentialsProvider.
      */
@@ -143,12 +153,12 @@ public abstract class PublisherSettings {
     settingsBuilder = settingsBuilder.setCredentialsProvider(credentialsProvider());
     settingsBuilder =
         addDefaultMetadata(
-            PubsubContext.of(FRAMEWORK),
+            PubsubContext.of(framework()),
             RoutingMetadata.of(topicPath(), partition),
             settingsBuilder);
     try {
       return PublisherServiceClient.create(
-          addDefaultSettings(topicPath().location().region(), settingsBuilder));
+          addDefaultSettings(topicPath().location().extractRegion(), settingsBuilder));
     } catch (Throwable t) {
       throw toCanonical(t).underlying;
     }
@@ -162,10 +172,10 @@ public abstract class PublisherSettings {
               .setServiceClient(
                   AdminServiceClient.create(
                       addDefaultSettings(
-                          topicPath().location().region(),
+                          topicPath().location().extractRegion(),
                           AdminServiceSettings.newBuilder()
                               .setCredentialsProvider(credentialsProvider()))))
-              .setRegion(topicPath().location().region())
+              .setRegion(topicPath().location().extractRegion())
               .build());
     } catch (Throwable t) {
       throw toCanonical(t).underlying;

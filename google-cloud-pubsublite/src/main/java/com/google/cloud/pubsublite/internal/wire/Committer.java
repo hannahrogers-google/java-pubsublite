@@ -19,8 +19,13 @@ package com.google.cloud.pubsublite.internal.wire;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiService;
 import com.google.cloud.pubsublite.Offset;
+import com.google.cloud.pubsublite.internal.CheckedApiException;
 
 public interface Committer extends ApiService {
   // Commit a given offset. Clean shutdown waits for all outstanding commits to complete.
   ApiFuture<Void> commitOffset(Offset offset);
+
+  // Waits until all commits have been sent and acknowledged by the server. Throws an exception if
+  // the committer shut down due to a permanent error.
+  void waitUntilEmpty() throws CheckedApiException;
 }
